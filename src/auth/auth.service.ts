@@ -1,12 +1,15 @@
 import {
-ConflictException,
-Injectable,
-UnauthorizedException,
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { createHash } from 'node:crypto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { RegisterDto } from './dto/register.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { sign, verify } from './jwt';
 import { UsersRepository } from './users.repository';
 
@@ -15,14 +18,18 @@ const REFRESH_TTL = 7 * 24 * 60 * 60; // 7 días
 
 @Injectable()
 export class AuthService {
-  constructor( private readonly users: UsersRepository) {}
+  constructor(private readonly users: UsersRepository) {}
 
-  async register(dto: RegisterDto): Promise<{ id: string; email: string }> {
+  async register(dto: RegisterDto): Promise<{ id: number; email: string }> {
     if (await this.users.findByEmail(dto.email!)) {
-      throw new ConflictException('El email ya estpa registrado');
+      throw new ConflictException('El email ya está registrado');
     }
-    const user = await this.users.save(dto.email!, hash(dto.password!));
-    return { id:user.id!, email: user.email! };
+    const user = await this.users.save({
+      email: dto.email!,
+      passwordHash: hash(dto.password!),
+      name: dto.name!,
+    });
+    return { id: Number(user.id), email: user.email! };
   }
 
   async login(
@@ -36,9 +43,8 @@ export class AuthService {
       throw new UnauthorizedException('Password incorrecto');
     }
     const claims = { sub: user.id!, email: user.email! };
-    const accessToken = sign ({...claims, type: 'access'}, ACCESS_TTL);
-    const refreshToken = sign({...claims, type: 'refresh'}, REFRESH_TTL);
-    console.log('Login de ' + user.email +': ' + accessToken);
+    const accessToken = sign({ ...claims, type: 'access' }, ACCESS_TTL);
+    const refreshToken = sign({ ...claims, type: 'refresh' }, REFRESH_TTL);
     return { accessToken, refreshToken };
   }
 
@@ -53,9 +59,56 @@ export class AuthService {
     );
     return { accessToken };
   }
+
+  async getProfile(userId: number) {
+    const user = await this.users.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+    const { passwordHash, ...profile } = user;
+    return profile;
+  }
+
+  async updateProfile(userId: number, dto: UpdateProfileDto) {
+    const user = await this.users.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const updateData: { email?: string; passwordHash?: string; name?: string } = {};
+
+    if (dto.email) {
+      const existing = await this.users.findByEmail(dto.email);
+      if (existing && Number(existing.id) !== userId) {
+        throw new BadRequestException('El correo ya está en uso por otro usuario');
+      }
+      updateData.email = dto.email;
+    }
+
+    if (dto.password) {
+      updateData.passwordHash = hash(dto.password);
+    }
+
+    if (dto.name) updateData.name = dto.name;
+
+    if (Object.keys(updateData).length === 0) {
+      throw new BadRequestException('No se proporcionaron datos para actualizar');
+    }
+
+    await this.users.update(userId, updateData);
+    return { message: 'Perfil actualizado con éxito' };
+  }
+
+  async deleteAccount(userId: number) {
+    const user = await this.users.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+    await this.users.delete(userId);
+    return { message: 'Cuenta eliminada exitosamente' };
+  }
 }
 
 function hash(password: string): string {
   return createHash('sha256').update(password).digest('hex');
 }
-

@@ -1,57 +1,91 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { ReporteRepository } from './reporte.repository';
-import { ReportResponseDto } from './dto/reporte-response.dto';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { ChangeStatusDto } from './dto/change-status.dto';
 import { CreateReporteDto } from './dto/create-reporte.dto';
 import { UpdateReporteDto } from './dto/update-reporte.dto';
-import { Report } from './entities/reporte-entity';
-import { userInfo } from 'os';
+import { ReporteRepository } from './reporte.repository';
 
 @Injectable()
-export class ReportsService {
-    constructor(private readonly repository: ReporteRepository) {}
-    async create(sub: string, data: CreateReporteDto): Promise<ReportResponseDto> {
-      const report = await this.repository.save(sub, {
-        title: data.title,
-        evidenceUrl: data.evidenceUrl,
-        description: data.description,
-        status: 'En Revision',
-        });
-        return ReportResponseDto.fromEntity(report);
+export class ReporteService {
+  constructor(private readonly repository: ReporteRepository) {}
+
+  async findAll() {
+    return this.repository.findAll();
+  }
+
+  async findMyReports(userId: number) {
+    return this.repository.findByUserId(userId);
+  }
+
+  async findOne(id: number) {
+    const report = await this.repository.findById(id);
+    if (!report) {
+      throw new NotFoundException(`Reporte con ID ${id} no encontrado`);
+    }
+    return report;
+  }
+
+  async create(userId: number, dto: CreateReporteDto) {
+    return this.repository.save(userId, dto);
+  }
+
+  async uploadImage(id: number, userId: number, file: Express.Multer.File) {
+    const report = await this.findOne(id);
+
+    if (report.userId !== userId) {
+      throw new ForbiddenException('No tienes permiso para subir imagen a este reporte');
     }
 
-    async findAll(userId: string): Promise<ReportResponseDto[]> {
-        const reports = await this.repository.findAll(userId);
-        return reports.map((r) => ReportResponseDto.fromEntity(r));
+    await this.repository.updateImagePath(id, file.filename);
+    return {
+      message: 'Imagen adjuntada al reporte con éxito',
+      imageUrl: `/uploads/${file.filename}`,
+    };
+  }
+
+  async update(id: number, userId: number, dto: UpdateReporteDto) {
+    const report = await this.findOne(id);
+
+    if (report.userId !== userId) {
+      throw new ForbiddenException('No tienes permiso para editar este reporte');
     }
 
-    async findOne(id: string): Promise<ReportResponseDto> {
-        const report = await this.repository.findById(id);
-        if (!report) {
-            throw new NotFoundException(`Reporte ${id} no encontrado`);
-        }
-        return ReportResponseDto.fromEntity(report);
+    if (
+      dto.categoryId === undefined &&
+      !dto.caseType &&
+      !dto.title &&
+      !dto.description
+    ) {
+      throw new BadRequestException('Se requiere al menos un campo para actualizar');
     }
 
-    async update(
-        id: string,
-        ownerId: string,
-        changes: UpdateReporteDto,
-    ): Promise<ReportResponseDto> {
-        const report = await this.repository.findById(id, ownerId);
-        if (!report) {
-            throw new NotFoundException(`Reporte ${id} con encontrado`);
-        }
-        
-        const updated = await this.repository.update(id, ownerId, changes);
-        return ReportResponseDto.fromEntity(updated!);
+    await this.repository.update(id, dto);
+    return { message: 'Reporte actualizado con éxito' };
+  }
+
+  async changeStatus(id: number, adminId: number, dto: ChangeStatusDto) {
+    await this.findOne(id);
+    await this.repository.updateStatus(
+      id,
+      adminId,
+      dto.statusId,
+      dto.fraudProbability,
+    );
+    return { message: 'Estado y revisión del reporte actualizados exitosamente' };
+  }
+
+  async remove(id: number, userId: number, userRoleId: number) {
+    const report = await this.findOne(id);
+
+    if (report.userId !== userId && userRoleId !== 1) {
+      throw new ForbiddenException('No tienes permiso para eliminar este reporte');
     }
 
-    async remove(id: string, ownerId: string): Promise<void> {
-        const report = await this.repository.findById(id, ownerId);
-        if (!report) {
-            throw new NotFoundException(`Reporte ${id} no encontrado`);
-        }
-        await this.repository.delete(id, ownerId);
-    }
-    
+    await this.repository.softDelete(id);
+    return { message: 'Reporte eliminado con éxito' };
+  }
 }

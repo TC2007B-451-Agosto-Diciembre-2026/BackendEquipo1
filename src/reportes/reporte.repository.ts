@@ -1,141 +1,122 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { randomUUID } from 'node:crypto';
 import type { Pool, ResultSetHeader, RowDataPacket } from 'mysql2/promise';
-import { DB_POOL } from 'src/database/database.module';
+import { DB_POOL } from '../database/database.module';
+import { CreateReporteDto } from './dto/create-reporte.dto';
+import { UpdateReporteDto } from './dto/update-reporte.dto';
 import { Report } from './entities/reporte-entity';
-
-const COLUMNS = `
-  r.id, 
-  r.owner_id, 
-  r.title, 
-  r.evidence_url, 
-  r.contact_data, 
-  r.description, 
-  vs.name AS status, 
-  r.created_at
-`;
 
 @Injectable()
 export class ReporteRepository {
-    constructor(@Inject(DB_POOL) private readonly pool: Pool) {}
+  constructor(@Inject(DB_POOL) private readonly pool: Pool) {}
 
-    async findAll(ownerId: string): Promise<Report[]> {
-        const [rows] = await this.pool.execute<RowDataPacket[]>(
-            `SELECT ${COLUMNS} 
-             FROM reports r
-             LEFT JOIN validation_statuses vs ON r.validation_status_id = vs.status_id
-             WHERE r.owner_id = ? 
-             ORDER BY r.created_at DESC`,
-            [ownerId],
-        );
-        return rows.map(toEntity);
+  async findAll(): Promise<Report[]> {
+    const [rows] = await this.pool.query<RowDataPacket[]>(
+      'SELECT * FROM reports WHERE deleted_at IS NULL ORDER BY created_at DESC',
+    );
+    return rows.map(toEntity);
+  }
+
+  async findByUserId(userId: number): Promise<Report[]> {
+    const [rows] = await this.pool.query<RowDataPacket[]>(
+      'SELECT * FROM reports WHERE user_id = ? AND deleted_at IS NULL ORDER BY created_at DESC',
+      [userId],
+    );
+    return rows.map(toEntity);
+  }
+
+  async findById(id: number): Promise<Report | undefined> {
+    const [rows] = await this.pool.query<RowDataPacket[]>(
+      'SELECT * FROM reports WHERE report_id = ? AND deleted_at IS NULL',
+      [id],
+    );
+    return rows[0] ? toEntity(rows[0]) : undefined;
+  }
+
+  async save(userId: number, dto: CreateReporteDto): Promise<Report> {
+    const [result] = await this.pool.query<ResultSetHeader>(
+      `INSERT INTO reports (user_id, category_id, status_id, case_type, title, description)
+   VALUES (?, ?, 1, ?, ?, ?)`,
+      [userId, dto.categoryId, dto.caseType, dto.title, dto.description],
+    );
+    return (await this.findById(result.insertId))!;
+  }
+
+  async update(id: number, dto: UpdateReporteDto): Promise<void> {
+    const fields: string[] = [];
+    const values: any[] = [];
+
+    if (dto.categoryId !== undefined) {
+      fields.push('category_id = ?');
+      values.push(dto.categoryId);
+    }
+    if (dto.caseType !== undefined) {
+      fields.push('case_type = ?');
+      values.push(dto.caseType);
+    }
+    if (dto.title !== undefined) {
+      fields.push('title = ?');
+      values.push(dto.title);
+    }
+    if (dto.description !== undefined) {
+      fields.push('description = ?');
+      values.push(dto.description);
     }
 
-    async findById(id: string, ownerId?: string): Promise<Report | undefined> {
-        let sql = `
-            SELECT ${COLUMNS} 
-            FROM reports r
-            LEFT JOIN validation_statuses vs ON r.validation_status_id = vs.status_id
-            WHERE r.id = ?
-        `;
-        const params: any[] = [id];
+    if (fields.length === 0) return;
 
-        if (ownerId) {
-            sql += ` AND r.owner_id = ?`;
-            params.push(ownerId);
-        }
+    values.push(id);
+    await this.pool.query(
+      `UPDATE reports SET ${fields.join(', ')} WHERE report_id = ? AND deleted_at IS NULL`,
+      values,
+    );
+  }
 
-        const [rows] = await this.pool.execute<RowDataPacket[]>(sql, params);
-        return rows[0] ? toEntity(rows[0]) : undefined;
-    }
+  async updateImagePath(id: number, filename: string): Promise<void> {
+    await this.pool.query(
+      'UPDATE reports SET image_path = ? WHERE report_id = ? AND deleted_at IS NULL',
+      [filename, id],
+    );
+  }
 
-    async save(
-        ownerId: string, 
-        report: Omit<Report, 'id' | 'ownerId' | 'createdAt'>
-    ): Promise<Report> {
-        const id = randomUUID();
-        const description = report.description ?? null;
-        // Si no mandan estado, por defecto asignamos "En revision"
-        const statusName = report.status ?? 'En revision';
+  async updateStatus(
+    id: number,
+    adminId: number,
+    statusId: number,
+    fraudProbability?: number,
+  ): Promise<void> {
+    await this.pool.query(
+      `UPDATE reports 
+       SET status_id = ?, admin_id = ?, fraud_probability = ?, approved_at = NOW() 
+       WHERE report_id = ? AND deleted_at IS NULL`,
+      [statusId, adminId, fraudProbability ?? null, id],
+    );
+  }
 
-        await this.pool.execute(
-            `INSERT INTO reports (id, owner_id, title, evidence_url, description, validation_status_id)
-             VALUES (?, ?, ?, ?, ?, 
-             (SELECT status_id FROM validation_statuses WHERE name = ? LIMIT 1)
-             )`,
-            [id, ownerId, report.title ?? null, report.evidenceUrl ?? null, description, statusName],
-        );
-
-        return (await this.findById(id, ownerId))!;
-    }
-
-    async updateStatus(id: string, ownerId: string, newStatus: string): Promise<Report | undefined> {
-        await this.pool.execute(
-            `UPDATE reports r
-             SET r.validation_status_id = (SELECT status_id FROM validation_statuses WHERE name = ? LIMIT 1)
-             WHERE r.id = ? AND r.owner_id = ?`,
-            [newStatus, id, ownerId],
-        );
-
-        return this.findById(id, ownerId);
-    }
-
-    async update(
-        id: string,
-        ownerId: string,
-        changes: Partial<Report>,
-    ): Promise<Report | undefined> {
-        if (changes.status) {
-            await this.updateStatus(id, ownerId, changes.status);
-            delete changes.status;
-        }
-
-        const columnMap: Record<string, string> = {
-            title: 'title',
-            evidenceUrl: 'evidence_url',
-            Description: 'description',
-        };
-
-        const assignments: string[] = [];
-        const values: any[] = [];
-
-        for (const [key, value] of Object.entries(changes)) {
-            if (columnMap[key] && value !== undefined) {
-                assignments.push(`${columnMap[key]} = ?`);
-                values.push(value);
-            }
-        }
-
-        if (assignments.length > 0) {
-            values.push(id, ownerId);
-            await this.pool.execute(
-                `UPDATE reports SET ${assignments.join(', ')} WHERE id = ? AND owner_id = ?`,
-                values,
-            );
-        }
-
-        return this.findById(id, ownerId);
-    }
-
-    async delete(id: string, ownerId: string): Promise<boolean> {
-        const [result] = await this.pool.execute<ResultSetHeader>(
-            `DELETE FROM reports WHERE id = ? AND owner_id = ?`,
-            [id, ownerId],
-        );
-        return result.affectedRows > 0;
-    }
+  async softDelete(id: number): Promise<void> {
+    await this.pool.query(
+      'UPDATE reports SET deleted_at = NOW() WHERE report_id = ? AND deleted_at IS NULL',
+      [id],
+    );
+  }
 }
 
 function toEntity(row: any): Report {
-    const report = new Report();
-    report.id = row.id;
-    report.ownerId = row.owner_id;
-    report.title = row.title;
-    report.evidenceUrl = row.evidence_url;
-    report.description = row.description ?? undefined;
-    report.status = row.status;
-    report.createdAt = row.created_at;
-    return report;
+  return {
+    id: row.report_id,
+    userId: row.user_id,
+    adminId: row.admin_id,
+    categoryId: row.category_id,
+    statusId: row.status_id,
+    caseType: row.case_type,
+    title: row.title,
+    description: row.description,
+    imagePath: row.image_path ?? null,
+    fraudProbability: row.fraud_probability !== null ? Number(row.fraud_probability) : null,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    approvedAt: row.approved_at,
+    deletedAt: row.deleted_at,
+  };
 }
 
 

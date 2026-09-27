@@ -1,9 +1,16 @@
 export class Report {
-    id: string | undefined;
-    ownerId: string | undefined;
-    title: string | undefined;
-    evidenceUrl: string | undefined;
-    description?: string;
-    status: string | undefined; // 1-En revision, 2-Fraude, 3-Confiable
-    createdAt: Date | undefined;
+  id!: number;
+  userId!: number;
+  adminId?: number | null;
+  categoryId!: number;
+  statusId!: number;
+  caseType!: string;
+  title!: string;
+  description!: string;
+  imagePath?: string | null;
+  fraudProbability?: number | null;
+  createdAt!: Date;
+  updatedAt!: Date;
+  approvedAt?: Date | null;
+  deletedAt?: Date | null;
 }

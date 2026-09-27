@@ -1,7 +1,10 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { RolesRepository } from "./role.repository";
 import { CreateRoleDto } from "./dto/create-role.dto";
 import { Role } from "./entities/role-entity";
+import { RoleResponseDto } from "./dto/role-response.dto";
+import { UpdateRoleDto } from "./dto/update-role.dto";
+import { AssignRoleDto } from './dto/assign-role.dto';
 
 /**
  * Servicio encargado de coordinar la lógica de negocio relativa a los Roles de usuario.
@@ -16,10 +19,10 @@ export class RolesService{
    * @param createRoleDto - Datos de creación validados por ValidationPipe.
    * @returns El objeto del rol recién registrado.
    */
-    async create(createRoleDto: CreateRoleDto): Promise<Role> {
+    async create(createRoleDto: CreateRoleDto): Promise<RoleResponseDto> {
   const id = await this.rolesRepository.create(createRoleDto.name);
   return {
-    role_id: id,
+    id: id,
     name: createRoleDto.name,
   };
 }
@@ -44,5 +47,29 @@ export class RolesService{
         }
         return role;
     }
+
+    async update(id: number, dto: UpdateRoleDto) {
+        await this.findOne(id);
+        if (!dto.name) {
+            throw new BadRequestException('Se requiere el campo name para actualizar');
+        }
+        await this.rolesRepository.update(id, dto.name)
+        return { message: 'Rol actualizado con éxito' };
+    }
+
+    async delete(id: number) {
+        await this.findOne(id);
+        await this.rolesRepository.delete(id);
+        return { message: 'Rol eliminado con éxito' }
+    }
+
+    async assignRole(userId: number, dto: AssignRoleDto) {
+    await this.findOne(dto.roleId);
+    const updated = await this.rolesRepository.assignRole(userId, dto.roleId);
+    if (!updated) {
+      throw new NotFoundException(`Usuario con ID ${userId} no encontrado o inactivo`);
+    }
+    return { message: `Rol ${dto.roleId} asignado con éxito al usuario ${userId}` };
+  }
 
 }
