@@ -9,8 +9,8 @@ export class StatsService {
     return this.repository.getSummary();
   }
 
-  async getByCategory() {
-    return this.repository.getByCategory();
+  async getByFraudType() {
+    return this.repository.getByFraudType();
   }
 
   async getByStatus() {

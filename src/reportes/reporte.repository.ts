@@ -34,9 +34,9 @@ export class ReporteRepository {
 
   async save(userId: number, dto: CreateReporteDto): Promise<Report> {
     const [result] = await this.pool.query<ResultSetHeader>(
-      `INSERT INTO reports (user_id, category_id, status_id, case_type, title, description)
+      `INSERT INTO reports (user_id, fraud_type_id, status_id, case_type, title, description)
    VALUES (?, ?, 1, ?, ?, ?)`,
-      [userId, dto.categoryId, dto.caseType, dto.title, dto.description],
+      [userId, dto.fraudTypeId, dto.caseType, dto.title, dto.description],
     );
     return (await this.findById(result.insertId))!;
   }
@@ -45,9 +45,9 @@ export class ReporteRepository {
     const fields: string[] = [];
     const values: any[] = [];
 
-    if (dto.categoryId !== undefined) {
-      fields.push('category_id = ?');
-      values.push(dto.categoryId);
+    if (dto.fraudTypeId !== undefined) {
+      fields.push('fraud_type_id = ?');
+      values.push(dto.fraudTypeId);
     }
     if (dto.caseType !== undefined) {
       fields.push('case_type = ?');
@@ -71,11 +71,12 @@ export class ReporteRepository {
     );
   }
 
-  async updateImagePath(id: number, filename: string): Promise<void> {
-    await this.pool.query(
-      'UPDATE reports SET image_path = ? WHERE report_id = ? AND deleted_at IS NULL',
-      [filename, id],
+  async addEvidence(reportId: number, type: string, content: string): Promise<number> {
+    const [result] = await this.pool.query<ResultSetHeader>(
+      'INSERT INTO evidence (report_id, evidence_type, content) VALUES (?, ?, ?)',
+      [reportId, type, content],
     );
+    return result.insertId;
   }
 
   async updateStatus(
@@ -105,12 +106,11 @@ function toEntity(row: any): Report {
     id: row.report_id,
     userId: row.user_id,
     adminId: row.admin_id,
-    categoryId: row.category_id,
+    fraudTypeId: row.fraud_type_id,
     statusId: row.status_id,
     caseType: row.case_type,
     title: row.title,
     description: row.description,
-    imagePath: row.image_path ?? null,
     fraudProbability: row.fraud_probability !== null ? Number(row.fraud_probability) : null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

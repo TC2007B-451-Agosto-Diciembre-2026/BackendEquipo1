@@ -25,9 +25,6 @@ export class ReportResponseDto {
   @ApiProperty({ example: 'Se identificó un dominio malicioso que suplanta la identidad bancaria.', description: 'Descripción detallada' })
   description!: string;
 
-  @ApiPropertyOptional({ example: '/uploads/evidencia_1710000000.png', nullable: true, description: 'Ruta estática de la imagen' })
-  imageUrl?: string | null;
-
   @ApiPropertyOptional({ example: 85.50, nullable: true, description: 'Probabilidad estimada de fraude (0 a 100)' })
   fraudProbability?: number | null;
 

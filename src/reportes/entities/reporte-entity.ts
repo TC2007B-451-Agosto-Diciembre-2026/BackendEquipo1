@@ -2,12 +2,11 @@ export class Report {
   id!: number;
   userId!: number;
   adminId?: number | null;
-  categoryId!: number;
+  fraudTypeId!: number;
   statusId!: number;
   caseType!: string;
   title!: string;
   description!: string;
-  imagePath?: string | null;
   fraudProbability?: number | null;
   createdAt!: Date;
   updatedAt!: Date;

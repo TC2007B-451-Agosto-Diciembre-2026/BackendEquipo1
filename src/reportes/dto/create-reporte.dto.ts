@@ -2,10 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsIn, IsInt, IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 export class CreateReporteDto {
-  @ApiProperty({ example: 1, description: 'ID de la categoría del reporte' })
-  @IsInt({ message: 'El categoryId debe ser un número entero' })
-  @IsNotEmpty({ message: 'El categoryId es obligatorio' })
-  categoryId!: number;
+  @ApiProperty({ example: 1, description: 'ID del tipo de fraude del reporte' })
+  @IsInt({ message: 'El fraudTypeId debe ser un número entero' })
+  @IsNotEmpty({ message: 'El fraudTypeId es obligatorio' })
+  fraudTypeId!: number;
 
   @ApiProperty({ example: 'report', enum: ['señalamiento', 'report'], description: 'Tipo de caso' })
   @IsString()

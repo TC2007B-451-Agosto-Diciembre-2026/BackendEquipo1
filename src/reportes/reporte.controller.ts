@@ -69,7 +69,7 @@ export class ReporteController {
       }),
     }),
   )
-  @ApiOperation({ summary: 'Subir o reemplazar la imagen de evidencia de un reporte' })
+  @ApiOperation({ summary: 'Adjuntar una imagen de evidencia a un reporte' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
