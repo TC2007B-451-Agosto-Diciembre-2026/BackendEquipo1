@@ -3,7 +3,8 @@ import type { Pool, ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import { DB_POOL } from '../database/database.module';
 import { User } from './entities/user.entity';
 
-const COLUMNS = 'user_id, role_id, name, email, password_hash, created_at, updated_at, deleted_at';
+const COLUMNS =
+  'user_id, role_id, name, email, password_hash, password_salt, phone, created_at, updated_at, deleted_at';
 
 @Injectable()
 export class UsersRepository {
@@ -25,19 +26,29 @@ export class UsersRepository {
     return rows[0] ? toEntity(rows[0]) : undefined;
   }
 
-  async save(data: { email: string; passwordHash: string; name: string; roleId?: number }): Promise<User> {
+  async save(data: {
+    email: string;
+    passwordHash: string;
+    passwordSalt: string;
+    name: string;
+    phone?: string;
+    roleId?: number;
+  }): Promise<User> {
     const roleId = data.roleId ?? 2; // Rol 'User' por defecto
 
     const [result] = await this.pool.query<ResultSetHeader>(
-      `INSERT INTO users (role_id, name, email, password_hash) 
-       VALUES (?, ?, ?, ?)`,
-      [roleId, data.name, data.email, data.passwordHash],
+      `INSERT INTO users (role_id, name, email, password_hash, password_salt, phone)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [roleId, data.name, data.email, data.passwordHash, data.passwordSalt, data.phone ?? null],
     );
 
     return (await this.findById(result.insertId))!;
   }
 
-  async update(id: number, data: { email?: string; passwordHash?: string; name?: string }): Promise<void> {
+  async update(
+    id: number,
+    data: { email?: string; passwordHash?: string; passwordSalt?: string; name?: string },
+  ): Promise<void> {
     const fields: string[] = [];
     const values: any[] = [];
 
@@ -48,6 +59,10 @@ export class UsersRepository {
     if (data.passwordHash) {
       fields.push('password_hash = ?');
       values.push(data.passwordHash);
+    }
+    if (data.passwordSalt) {
+      fields.push('password_salt = ?');
+      values.push(data.passwordSalt);
     }
     if (data.name) {
       fields.push('name = ?');
@@ -78,6 +93,8 @@ function toEntity(row: any): User {
   user.name = row.name;
   user.email = row.email;
   user.passwordHash = row.password_hash;
+  user.passwordSalt = row.password_salt;
+  user.phone = row.phone ?? undefined;
   user.createdAt = row.created_at ? new Date(row.created_at) : undefined;
   user.updatedAt = row.updated_at ? new Date(row.updated_at) : undefined;
   user.deletedAt = row.deleted_at ? new Date(row.deleted_at) : undefined;

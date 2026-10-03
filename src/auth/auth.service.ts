@@ -5,7 +5,8 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { createHash } from 'node:crypto';
+import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
+import { promisify } from 'node:util';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -24,10 +25,13 @@ export class AuthService {
     if (await this.users.findByEmail(dto.email!)) {
       throw new ConflictException('El email ya está registrado');
     }
+    const { passwordHash, passwordSalt } = await hashPassword(dto.password!);
     const user = await this.users.save({
       email: dto.email!,
-      passwordHash: hash(dto.password!),
+      passwordHash,
+      passwordSalt,
       name: dto.name!,
+      phone: dto.phone,
     });
     return { id: Number(user.id), email: user.email! };
   }
@@ -39,7 +43,7 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('El usuario no existe');
     }
-    if (user.passwordHash !== hash(dto.password!)) {
+    if (!(await verifyPassword(dto.password!, user.passwordHash!, user.passwordSalt!))) {
       throw new UnauthorizedException('Password incorrecto');
     }
     const claims = { sub: user.id!, email: user.email! };
@@ -65,7 +69,7 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
     }
-    const { passwordHash, ...profile } = user;
+    const { passwordHash, passwordSalt, ...profile } = user;
     return profile;
   }
 
@@ -75,7 +79,12 @@ export class AuthService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    const updateData: { email?: string; passwordHash?: string; name?: string } = {};
+    const updateData: {
+      email?: string;
+      passwordHash?: string;
+      passwordSalt?: string;
+      name?: string;
+    } = {};
 
     if (dto.email) {
       const existing = await this.users.findByEmail(dto.email);
@@ -86,7 +95,7 @@ export class AuthService {
     }
 
     if (dto.password) {
-      updateData.passwordHash = hash(dto.password);
+      Object.assign(updateData, await hashPassword(dto.password));
     }
 
     if (dto.name) updateData.name = dto.name;
@@ -109,6 +118,30 @@ export class AuthService {
   }
 }
 
-function hash(password: string): string {
-  return createHash('sha256').update(password).digest('hex');
+// scrypt con una sal aleatoria por usuario. La sal se guarda en su propia
+// columna (password_salt) y el hash en password_hash, ambos en hex.
+const scryptAsync = promisify(scrypt) as (
+  password: string,
+  salt: string,
+  keylen: number,
+) => Promise<Buffer>;
+const SALT_BYTES = 16; // 32 caracteres hex -> CHAR(32)
+const HASH_BYTES = 64; // 128 caracteres hex -> CHAR(128)
+
+async function hashPassword(
+  password: string,
+): Promise<{ passwordHash: string; passwordSalt: string }> {
+  const passwordSalt = randomBytes(SALT_BYTES).toString('hex');
+  const hash = await scryptAsync(password, passwordSalt, HASH_BYTES);
+  return { passwordHash: hash.toString('hex'), passwordSalt };
+}
+
+async function verifyPassword(
+  password: string,
+  storedHash: string,
+  salt: string,
+): Promise<boolean> {
+  const hash = await scryptAsync(password, salt, HASH_BYTES);
+  const stored = Buffer.from(storedHash, 'hex');
+  return stored.length === hash.length && timingSafeEqual(stored, hash);
 }

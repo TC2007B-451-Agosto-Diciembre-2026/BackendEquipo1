@@ -1,4 +1,5 @@
-CREATE DATABASE sentinel;
+CREATE DATABASE IF NOT EXISTS sentinel
+  CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 USE sentinel;
 CREATE TABLE roles (
 role_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -20,8 +21,9 @@ user_id INT AUTO_INCREMENT PRIMARY KEY,
 role_id INT NOT NULL,
 name VARCHAR(100) NOT NULL,
 email VARCHAR(150) NOT NULL,
-password_hash VARCHAR(64) NOT NULL,
-phone VARCHAR(20) NOT NULL,
+password_hash CHAR(128) NOT NULL,
+password_salt CHAR(32) NOT NULL,
+phone VARCHAR(20) NULL DEFAULT NULL,
 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE
 CURRENT_TIMESTAMP,
@@ -66,3 +68,20 @@ ON DELETE CASCADE,
 CONSTRAINT chk_evidence_type CHECK (evidence_type IN ('url', 'text', 'phone',
 'image'))
 );
+
+-- Catálogos. Los IDs son fijos porque el backend los usa:
+-- rol 2 = usuario por defecto al registrarse, rol 1 = admin;
+-- estado 1 = pendiente (DEFAULT de reports.status_id), 2 = aprobado, 3 = rechazado.
+INSERT INTO roles (role_id, name) VALUES
+(1, 'admin'),
+(2, 'usuario');
+
+INSERT INTO validation_statuses (status_id, name) VALUES
+(1, 'pendiente'),
+(2, 'aprobado'),
+(3, 'rechazado');
+
+INSERT INTO fraud_types (fraud_type_id, name) VALUES
+(1, 'Multa de tránsito falsa'),
+(2, 'Fotocívica falsa'),
+(3, 'Otro');
