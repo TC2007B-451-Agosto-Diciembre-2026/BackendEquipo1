@@ -122,8 +122,8 @@ return {
     adminId: row.admin_id,
     categoryId: row.category_id,
     statusId: row.status_id,
-    categoryName: row.category_name ?? row.categoryName ?? null, // <-- Mapeado
-    statusName: row.status_name ?? row.statusName ?? null,       // <-- Mapeado
+    categoryName: row.category_name ?? row.categoryName ?? null, 
+    statusName: row.status_name ?? row.statusName ?? null,       
     caseType: row.case_type,
     title: row.title,
     description: row.description,
