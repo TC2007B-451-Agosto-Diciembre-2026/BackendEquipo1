@@ -4,6 +4,8 @@ export class Report {
   adminId?: number | null;
   categoryId!: number;
   statusId!: number;
+  categoryName?: string | null; 
+  statusName?: string | null;   
   caseType!: string;
   title!: string;
   description!: string;

@@ -25,13 +25,13 @@ export class UsersRepository {
     return rows[0] ? toEntity(rows[0]) : undefined;
   }
 
-  async save(data: { email: string; passwordHash: string; name: string; roleId?: number }): Promise<User> {
-    const roleId = data.roleId ?? 2; // Rol 'User' por defecto
+  async save(data: { email: string; passwordHash: string; name: string; role_Id?: number }): Promise<User> {
+    const role_Id = data.role_Id ?? 2; 
 
     const [result] = await this.pool.query<ResultSetHeader>(
       `INSERT INTO users (role_id, name, email, password_hash) 
        VALUES (?, ?, ?, ?)`,
-      [roleId, data.name, data.email, data.passwordHash],
+      [role_Id, data.name, data.email, data.passwordHash],
     );
 
     return (await this.findById(result.insertId))!;
@@ -74,7 +74,7 @@ export class UsersRepository {
 function toEntity(row: any): User {
   const user = new User();
   user.id = row.user_id;
-  user.role = row.role_id ? String(row.role_id) : undefined;
+  user.role_id = row.role_id ? String(row.role_id) : undefined;
   user.name = row.name;
   user.email = row.email;
   user.passwordHash = row.password_hash;
