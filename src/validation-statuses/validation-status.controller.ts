@@ -14,10 +14,14 @@ import { AuthGuard } from '../auth/auth.guard';
 import { CreateValidationStatusDto } from './dto/create-validation-status.dto';
 import { UpdateValidationStatusDto } from './dto/update-validation-status.dto';
 import { ValidationStatusesService } from './validation-status.service';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/auth/roles.decorator';
+import { Role } from 'src/auth/roles.enum';
 
 @ApiTags('validation-statuses')
 @ApiBearerAuth()
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
 @Controller('validation-statuses')
 export class ValidationStatusesController {
   constructor(private readonly service: ValidationStatusesService) {}

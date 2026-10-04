@@ -15,10 +15,14 @@ import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { RolesService } from './role.service';
 import { AssignRoleDto } from './dto/assign-role.dto';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/auth/roles.decorator';
+import { Role } from 'src/auth/roles.enum';
 
 @ApiTags('roles')
 @ApiBearerAuth()
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard,RolesGuard)
+@Roles(Role.ADMIN)
 @Controller('roles')
 export class RolesController {
     constructor(private readonly rolesService: RolesService) {}

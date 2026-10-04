@@ -88,4 +88,17 @@ export class ReporteService {
     await this.repository.softDelete(id);
     return { message: 'Reporte eliminado con éxito' };
   }
+
+  async findDeleted() {
+    return this.repository.findDeleted();
+  }
+
+  async restore(id: number) {
+    const report = await this.repository.findDeletedById(id);
+    if(!report) {
+      throw new NotFoundException("El reporte no está en la papelera");
+    }
+    await this.repository.restore(id);
+    return { message: 'Reporte restaurado con éxito' };
+  }
 }

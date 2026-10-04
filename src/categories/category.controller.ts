@@ -14,11 +14,14 @@ import { AuthGuard } from '../auth/auth.guard';
 import { CategoriesService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/auth/roles.decorator';
+import { Role } from 'src/auth/roles.enum';
 
 @ApiTags('categories')
 @ApiBearerAuth()
-@UseGuards(AuthGuard)
-
+@UseGuards(AuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
 @Controller('categories')
 export class CategoriesController {
     constructor(private readonly categoriesService: CategoriesService) {}

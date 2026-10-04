@@ -28,6 +28,7 @@ export class AuthService {
       email: dto.email!,
       passwordHash: hash(dto.password!),
       name: dto.name!,
+      role_Id: 2,
     });
     return { id: Number(user.id), email: user.email! };
   }
@@ -42,7 +43,7 @@ export class AuthService {
     if (user.passwordHash !== hash(dto.password!)) {
       throw new UnauthorizedException('Password incorrecto');
     }
-    const claims = { sub: user.id!, email: user.email! };
+    const claims = { sub: user.id!, email: user.email!, role_id: Number(user.role_id!) };
     const accessToken = sign({ ...claims, type: 'access' }, ACCESS_TTL);
     const refreshToken = sign({ ...claims, type: 'refresh' }, REFRESH_TTL);
     return { accessToken, refreshToken };
@@ -54,7 +55,7 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token inválido');
     }
     const accessToken = sign(
-      { sub: payload.sub, email: payload.email, type: 'access' },
+      { sub: payload.sub, email: payload.email, role_id: payload.role_id, type: 'access' },
       ACCESS_TTL,
     );
     return { accessToken };
