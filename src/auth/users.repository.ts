@@ -9,6 +9,13 @@ const COLUMNS = 'user_id, role_id, name, email, password_hash, created_at, updat
 export class UsersRepository {
   constructor(@Inject(DB_POOL) private readonly pool: Pool) {}
 
+  async findAll(): Promise<User[]> {
+    const [rows] = await this.pool.query<RowDataPacket[]>(
+      `SELECT ${COLUMNS} FROM users WHERE deleted_at IS NULL ORDER BY user_id DESC`,
+    );
+    return rows.map(toEntity);
+  }
+
   async findByEmail(email: string): Promise<User | undefined> {
     const [rows] = await this.pool.query<RowDataPacket[]>(
       `SELECT ${COLUMNS} FROM users WHERE email = ? AND deleted_at IS NULL`,
@@ -60,6 +67,13 @@ export class UsersRepository {
     await this.pool.query(
       `UPDATE users SET ${fields.join(', ')} WHERE user_id = ? AND deleted_at IS NULL`,
       values,
+    );
+  }
+
+  async updateRole(id: number, roleId: number): Promise<void> {
+    await this.pool.query(
+      'UPDATE users SET role_id = ? WHERE user_id = ? AND deleted_at IS NULL',
+      [roleId, id],
     );
   }
 

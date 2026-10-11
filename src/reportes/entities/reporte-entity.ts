@@ -5,9 +5,12 @@ export class Report {
   categoryId!: number;
   statusId!: number;
   categoryName?: string | null; 
-  statusName?: string | null;   
+  statusName?: string | null;  
+  reporterName?: string | null;
+  reporterEmail?: string | null; 
   caseType!: string;
   title!: string;
+  evidenceUrl?: string | null; 
   description!: string;
   imagePath?: string | null;
   fraudProbability?: number | null;

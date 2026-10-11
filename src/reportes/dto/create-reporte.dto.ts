@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsInt, IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsIn, IsInt, IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength } from 'class-validator';
 
 export class CreateReporteDto {
   @ApiProperty({ example: 1, description: 'ID de la categoría del reporte' })
@@ -18,6 +18,12 @@ export class CreateReporteDto {
   @IsNotEmpty({ message: 'El título es obligatorio' })
   @MaxLength(150, { message: 'El título no puede exceder los 150 caracteres' })
   title!: string;
+
+  @ApiProperty({ example: 'https://banco-falso-login.com' })
+  @IsOptional()
+  @IsString()
+  @IsUrl()
+  evidenceUrl?: string;
 
   @ApiProperty({ example: 'Se identificó un dominio malicioso que suplanta la identidad bancaria.', description: 'Descripción detallada' })
   @IsString({ message: 'La descripción debe ser texto' })
