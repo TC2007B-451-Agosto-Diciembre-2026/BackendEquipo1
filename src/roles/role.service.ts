@@ -4,7 +4,7 @@ import { CreateRoleDto } from "./dto/create-role.dto";
 import { Role } from "./entities/role-entity";
 import { RoleResponseDto } from "./dto/role-response.dto";
 import { UpdateRoleDto } from "./dto/update-role.dto";
-import { AssignRoleDto } from './dto/assign-role.dto';
+import { Role as BaseRole } from '../auth/roles.enum';
 
 /**
  * Servicio encargado de coordinar la lógica de negocio relativa a los Roles de usuario.
@@ -50,6 +50,7 @@ export class RolesService{
 
     async update(id: number, dto: UpdateRoleDto) {
         await this.findOne(id);
+        assertNotBaseRole(id);
         if (!dto.name) {
             throw new BadRequestException('Se requiere el campo name para actualizar');
         }
@@ -59,17 +60,18 @@ export class RolesService{
 
     async delete(id: number) {
         await this.findOne(id);
+        assertNotBaseRole(id);
+        if (await this.rolesRepository.countUsersWithRole(id) > 0) {
+            throw new BadRequestException('No se puede eliminar un rol que tiene usuarios asignados');
+        }
         await this.rolesRepository.delete(id);
         return { message: 'Rol eliminado con éxito' }
     }
 
-    async assignRole(userId: number, dto: AssignRoleDto) {
-    await this.findOne(dto.roleId);
-    const updated = await this.rolesRepository.assignRole(userId, dto.roleId);
-    if (!updated) {
-      throw new NotFoundException(`Usuario con ID ${userId} no encontrado o inactivo`);
-    }
-    return { message: `Rol ${dto.roleId} asignado con éxito al usuario ${userId}` };
-  }
+}
 
+function assertNotBaseRole(id: number) {
+    if (id === BaseRole.ADMIN || id === BaseRole.USER) {
+        throw new BadRequestException('Los roles admin y usuario no se pueden modificar ni eliminar');
+    }
 }

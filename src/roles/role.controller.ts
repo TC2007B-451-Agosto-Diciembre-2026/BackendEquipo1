@@ -14,7 +14,6 @@ import { AuthGuard } from '../auth/auth.guard';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { RolesService } from './role.service';
-import { AssignRoleDto } from './dto/assign-role.dto';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
 import { Role } from 'src/auth/roles.enum';
@@ -65,13 +64,5 @@ export class RolesController {
         return this.rolesService.delete(id);
     }
 
-    @Patch('assign/:userId')
-    @ApiOperation({ summary: 'Asignar o cambiar el rol de un usuario en específico' })
-    assignRole(
-        @Param('userId', ParseIntPipe) userId: number,
-        @Body() dto: AssignRoleDto,
-    ) {
-        return this.rolesService.assignRole(userId, dto);
-    }
 
 }
