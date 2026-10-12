@@ -11,7 +11,8 @@ ENV NODE_ENV=production
 COPY --from=build /app/package.json ./
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
-RUN mkdir -p uploads && chown -R node:node uploads
+COPY --chown=node:node db/seed-evidence/ ./uploads/
+RUN mkdir -p uploads && chown node:node uploads
 USER node
 EXPOSE 3000
 CMD ["node", "dist/main.js"]

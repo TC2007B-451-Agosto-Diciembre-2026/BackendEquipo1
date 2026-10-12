@@ -120,14 +120,16 @@ export class ReporteService {
       throw new NotFoundException(`Reporte con ID ${id} no encontrado`);
     }
     const rows = await this.repository.findEvidence(id);
-    return rows.map((row) => ({
-      id: row.evidence_id,
-      type: row.evidence_type,
-      ...(row.evidence_type === 'image'
-        ? { url: signedEvidenceUrl(row.evidence_id) }
-        : { content: row.content }),
-      createdAt: row.created_at,
-    }));
+    return rows
+      .filter((row) => row.evidence_type !== 'image' || storedImage(row.content))
+      .map((row) => ({
+        id: row.evidence_id,
+        type: row.evidence_type,
+        ...(row.evidence_type === 'image'
+          ? { url: signedEvidenceUrl(row.evidence_id) }
+          : { content: row.content }),
+        createdAt: row.created_at,
+      }));
   }
 
   async openEvidenceFile(evidenceId: number, exp: number, sig: string) {
@@ -135,17 +137,13 @@ export class ReporteService {
       return null;
     }
     const evidence = await this.repository.findEvidenceById(evidenceId);
-    const match = /^reports\/\d+\/[0-9a-f-]+\.(jpg|png)$/.exec(evidence?.content ?? '');
-    if (!evidence || evidence.evidence_type !== 'image' || !match) {
-      return null;
-    }
-    const path = join(UPLOAD_DIR, evidence.content);
-    if (!existsSync(path)) {
+    const image = evidence?.evidence_type === 'image' ? storedImage(evidence.content) : null;
+    if (!image) {
       return null;
     }
     return {
-      stream: createReadStream(path),
-      mimeType: match[1] === 'png' ? 'image/png' : 'image/jpeg',
+      stream: createReadStream(image.path),
+      mimeType: image.mimeType,
     };
   }
 
@@ -217,6 +215,18 @@ function toPublic(report: Report) {
 }
 
 const UPLOAD_DIR = join(process.cwd(), 'uploads');
+
+function storedImage(content: string): { path: string; mimeType: string } | null {
+  const match = /^reports\/\d+\/[0-9a-f-]+\.(jpg|png)$/.exec(content ?? '');
+  if (!match) {
+    return null;
+  }
+  const path = join(UPLOAD_DIR, content);
+  if (!existsSync(path)) {
+    return null;
+  }
+  return { path, mimeType: match[1] === 'png' ? 'image/png' : 'image/jpeg' };
+}
 
 function imageExtension(buffer: Buffer): 'jpg' | 'png' | null {
   if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
