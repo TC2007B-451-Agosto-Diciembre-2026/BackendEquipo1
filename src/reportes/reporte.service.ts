@@ -4,6 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
+import { createReadStream, existsSync } from 'node:fs';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
+import { isValidEvidenceSignature, signedEvidenceUrl } from './evidence-url';
 import { ChangeStatusDto } from './dto/change-status.dto';
 import { CreateReporteDto } from './dto/create-reporte.dto';
 import { UpdateReporteDto } from './dto/update-reporte.dto';
@@ -60,18 +65,67 @@ export class ReporteService {
   }
 
   async uploadImage(id: number, userId: number, file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('Falta el archivo en el campo "image"');
+    }
     const report = await this.findOne(id);
 
     if (report.userId !== userId) {
       throw new ForbiddenException('No tienes permiso para subir imagen a este reporte');
     }
 
-    const imageUrl = `/uploads/${file.filename}`;
-    const evidenceId = await this.repository.addEvidence(id, 'image', imageUrl);
+    const ext = imageExtension(file.buffer);
+    if (!ext) {
+      throw new BadRequestException('Solo se aceptan imágenes JPG o PNG');
+    }
+
+    const key = `reports/${id}/${randomUUID()}.${ext}`;
+    const path = join(UPLOAD_DIR, key);
+    await mkdir(dirname(path), { recursive: true });
+    await writeFile(path, file.buffer);
+
+    const evidenceId = await this.repository.addEvidence(id, 'image', key);
     return {
       message: 'Imagen adjuntada al reporte con éxito',
       evidenceId,
-      imageUrl,
+      url: signedEvidenceUrl(evidenceId),
+    };
+  }
+
+  async findEvidence(id: number, userId: number, roleId: number) {
+    const report = await this.repository.findById(id);
+    const allowed =
+      report && (roleId === Role.ADMIN || (!report.deletedAt && report.userId === userId));
+    if (!allowed) {
+      throw new NotFoundException(`Reporte con ID ${id} no encontrado`);
+    }
+    const rows = await this.repository.findEvidence(id);
+    return rows.map((row) => ({
+      id: row.evidence_id,
+      type: row.evidence_type,
+      ...(row.evidence_type === 'image'
+        ? { url: signedEvidenceUrl(row.evidence_id) }
+        : { content: row.content }),
+      createdAt: row.created_at,
+    }));
+  }
+
+  async openEvidenceFile(evidenceId: number, exp: number, sig: string) {
+    if (!isValidEvidenceSignature(evidenceId, exp, sig)) {
+      return null;
+    }
+    const evidence = await this.repository.findEvidenceById(evidenceId);
+    const match = /^reports\/\d+\/[0-9a-f-]+\.(jpg|png)$/.exec(evidence?.content ?? '');
+    if (!evidence || evidence.evidence_type !== 'image' || !match) {
+      return null;
+    }
+    const path = join(UPLOAD_DIR, evidence.content);
+    if (!existsSync(path)) {
+      return null;
+    }
+    return {
+      stream: createReadStream(path),
+      mimeType: match[1] === 'png' ? 'image/png' : 'image/jpeg',
     };
   }
 
@@ -134,4 +188,17 @@ export class ReporteService {
 function toPublic(report: Report) {
   const { userId, adminId, reporterName, reporterEmail, ...rest } = report;
   return rest;
+}
+
+const UPLOAD_DIR = join(process.cwd(), 'uploads');
+
+function imageExtension(buffer: Buffer): 'jpg' | 'png' | null {
+  if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+    return 'jpg';
+  }
+  const png = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+  if (buffer.length >= png.length && png.every((byte, i) => buffer[i] === byte)) {
+    return 'png';
+  }
+  return null;
 }

@@ -86,6 +86,22 @@ export class ReporteRepository {
     );
   }
 
+  async findEvidence(reportId: number): Promise<RowDataPacket[]> {
+    const [rows] = await this.pool.query<RowDataPacket[]>(
+      'SELECT evidence_id, evidence_type, content, created_at FROM evidence WHERE report_id = ? ORDER BY evidence_id',
+      [reportId],
+    );
+    return rows;
+  }
+
+  async findEvidenceById(id: number): Promise<RowDataPacket | undefined> {
+    const [rows] = await this.pool.query<RowDataPacket[]>(
+      'SELECT evidence_id, report_id, evidence_type, content FROM evidence WHERE evidence_id = ?',
+      [id],
+    );
+    return rows[0];
+  }
+
   async addEvidence(reportId: number, type: string, content: string): Promise<number> {
     const [result] = await this.pool.query<ResultSetHeader>(
       'INSERT INTO evidence (report_id, evidence_type, content) VALUES (?, ?, ?)',

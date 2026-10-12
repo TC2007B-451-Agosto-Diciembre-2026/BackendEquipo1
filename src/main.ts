@@ -4,7 +4,6 @@ import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { networkInterfaces } from 'node:os';
-import { join } from 'node:path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -14,9 +13,6 @@ async function bootstrap() {
   if (process.env.TRUST_PROXY) {
     app.set('trust proxy', Number(process.env.TRUST_PROXY));
   }
-
-  
-  app.useStaticAssets(join(process.cwd(), 'uploads'), { prefix: '/uploads/' });
 
   const config = new DocumentBuilder()
     .setTitle('API Sistema de Reportes y Roles')
