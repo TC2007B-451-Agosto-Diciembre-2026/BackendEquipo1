@@ -22,6 +22,26 @@ npm run start:dev
 
 La aplicación estará disponible en `http://localhost:3000`.
 
+## Base de datos y datos de prueba
+
+```bash
+mysql -u root -p < db/schema.sql
+mysql -u root -p < db/seed.sql
+```
+
+`db/schema.sql` crea la base `sentinel`, las tablas y los catálogos (rol 1 = admin, rol 2 = usuario; estado 1 = pendiente, 2 = aprobado, 3 = rechazado). `db/seed.sql` agrega datos ficticios con estas cuentas:
+
+| Rol | Email | Contraseña |
+| --- | --- | --- |
+| admin | laura.mendez@sentinel.test | Admin#2026 |
+| admin | ricardo.salas@sentinel.test | Admin#2026 |
+| usuario | mafer.lopez@sentinel.test | Sentinel#2026 |
+| usuario | jose.hernandez@sentinel.test | Sentinel#2026 |
+| usuario | daniela.ruiz@sentinel.test | Sentinel#2026 |
+| usuario | pedro.castillo@sentinel.test | Sentinel#2026 |
+
+Cambien estas contraseñas antes de exponer el servidor. Para generar el hash y la sal de un usuario nuevo: `node scripts/hash-password.mjs "<contraseña>"`.
+
 ## Documentación Interactiva (Swagger)
 
 Puedes acceder a la documentación interactiva OpenAPI y probar los endpoints desde el navegador en:

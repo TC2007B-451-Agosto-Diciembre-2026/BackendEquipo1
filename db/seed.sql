@@ -1,28 +1,6 @@
--- =====================================================================
--- SENTINEL - Datos de ejemplo
--- Se ejecuta DESPUÉS de db/schema.sql (que crea las tablas y los catálogos
--- roles, validation_statuses y categories).
---
--- Todos los datos son ficticios: dominios .example / .test (reservados)
--- y teléfonos 55 0000 xxxx.
---
--- Cuentas de prueba (cada una con su propia sal; generadas con
--- scripts/hash-password.mjs):
---   admin   laura.mendez@sentinel.test    Admin#2026
---   admin   ricardo.salas@sentinel.test   Admin#2026
---   usuario mafer.lopez@sentinel.test     Sentinel#2026
---   usuario jose.hernandez@sentinel.test  Sentinel#2026
---   usuario daniela.ruiz@sentinel.test    Sentinel#2026
---   usuario pedro.castillo@sentinel.test  Sentinel#2026
--- Cambien estas contraseñas antes de exponer el servidor (pentesting/UAT).
--- =====================================================================
 SET NAMES utf8mb4;
 USE sentinel;
 
--- ---------------------------------------------------------------------
--- users: 2 administradores (role_id 1) y 4 usuarios (role_id 2).
--- Relación 1:N roles -> users.
--- ---------------------------------------------------------------------
 INSERT INTO users (user_id, role_id, name, email, password_hash, password_salt, phone, created_at) VALUES
 (1, 1, 'Laura Méndez Ortiz', 'laura.mendez@sentinel.test',
  '89e38437eac477d5ece488a2151a12dcbb8074f1c9aeadec6bf121a01ca2a2470e7addd311b45aff038e21f5e9bcbfe9ff3095d8f234b997c03e442ce3ee7f25',
@@ -43,16 +21,6 @@ INSERT INTO users (user_id, role_id, name, email, password_hash, password_salt, 
  'b320334adbbdfbe6732722fde136f0dca9b3184f987ffe86d6f1190c0cd74c018f02003d09877bd03a233640c8603930b103e61318e56e87bf45a7628bcf6d9c',
  'ab424f2506b177aaca4f6fe8528a2dfe', '5500000103', '2026-09-20 20:30:00');
 
--- ---------------------------------------------------------------------
--- reports: reportes (víctimas) y señalamientos (posibles víctimas).
--- Cubre los 3 estados, las 3 categorías y ambos case_type.
--- Relaciones 1:N: users -> reports (autor), users -> reports (admin que
--- revisó), categories -> reports y validation_statuses -> reports.
--- Reglas que reflejan los datos:
---   * pendiente (1): sin admin_id, sin approved_at ni fraud_probability.
---   * aprobado (2) / rechazado (3): admin_id, approved_at y fraud_probability.
---   * El reporte 9 tiene deleted_at (borrado lógico por su autor).
--- ---------------------------------------------------------------------
 INSERT INTO reports (report_id, user_id, admin_id, category_id, status_id, case_type, title, description, fraud_probability, created_at, approved_at, deleted_at) VALUES
 (1, 3, 1, 2, 2, 'report',
  'Pagué una fotocívica falsa que llegó por SMS',
@@ -91,13 +59,6 @@ INSERT INTO reports (report_id, user_id, admin_id, category_id, status_id, case_
  'Lo registré dos veces por error; es el mismo caso del reporte anterior.',
  NULL, '2026-08-12 10:20:00', NULL, '2026-08-12 10:25:00');
 
--- ---------------------------------------------------------------------
--- evidence: par tipo + contenido. Relación 1:N reports -> evidence
--- (el reporte 1 tiene 3 evidencias; el 8 ninguna).
--- Para 'image', content es el link al objeto en el bucket local de MinIO
--- (servicio "storage", bucket "evidence"). Estos archivos no existen
--- todavía en el bucket; suban imágenes con esas rutas si quieren verlas.
--- ---------------------------------------------------------------------
 INSERT INTO evidence (evidence_id, report_id, evidence_type, content, created_at) VALUES
 (1, 1, 'text',  'SEMOVI: Tiene una fotocivica pendiente por $1,245. Pague HOY con 30% de descuento y evite recargos: http://semovi-pagos.example/fotocivica?folio=88213', '2026-08-12 10:14:00'),
 (2, 1, 'url',   'http://semovi-pagos.example/fotocivica?folio=88213', '2026-08-12 10:14:00'),

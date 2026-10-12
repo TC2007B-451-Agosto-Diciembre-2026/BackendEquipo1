@@ -3,7 +3,6 @@ import { createPool } from 'mysql2/promise';
 import type { Pool } from 'mysql2/promise';
 export const DB_POOL = 'DB_POOL';
 
-// En Docker Compose se define en .env (ej. mysql://user:pass@db:3306/sentinel).
 const DATABASE_URL =
   process.env.DATABASE_URL ?? 'mysql://root:root@localhost:3306/sentinel';
 @Module({

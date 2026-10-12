@@ -1,8 +1,3 @@
--- =====================================================================
--- SENTINEL - Modelo físico (MySQL 8)
--- Crea la base de datos, las 6 tablas y los catálogos desde cero.
--- Los datos de ejemplo están en db/seed.sql (se ejecuta después).
--- =====================================================================
 SET NAMES utf8mb4;
 CREATE DATABASE IF NOT EXISTS sentinel
   CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
@@ -75,9 +70,6 @@ CONSTRAINT chk_evidence_type CHECK (evidence_type IN ('url', 'text', 'phone',
 'image'))
 );
 
--- Catálogos. Los IDs son fijos porque el backend los usa:
--- rol 2 = usuario por defecto al registrarse, rol 1 = admin;
--- estado 1 = pendiente (DEFAULT de reports.status_id), 2 = aprobado, 3 = rechazado.
 INSERT INTO roles (role_id, name) VALUES
 (1, 'admin'),
 (2, 'usuario');

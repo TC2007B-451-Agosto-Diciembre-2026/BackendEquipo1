@@ -145,15 +145,13 @@ export class AuthService {
   }
 }
 
-// scrypt con una sal aleatoria por usuario. La sal se guarda en su propia
-// columna (password_salt) y el hash en password_hash, ambos en hex.
 const scryptAsync = promisify(scrypt) as (
   password: string,
   salt: string,
   keylen: number,
 ) => Promise<Buffer>;
-const SALT_BYTES = 16; // 32 caracteres hex -> CHAR(32)
-const HASH_BYTES = 64; // 128 caracteres hex -> CHAR(128)
+const SALT_BYTES = 16;
+const HASH_BYTES = 64;
 
 async function hashPassword(
   password: string,
