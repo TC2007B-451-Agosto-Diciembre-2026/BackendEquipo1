@@ -49,7 +49,7 @@ export class ReporteService {
 
   async findOne(id: number) {
     const report = await this.repository.findById(id);
-    if (!report) {
+    if (!report || report.deletedAt) {
       throw new NotFoundException(`Reporte con ID ${id} no encontrado`);
     }
     return report;
