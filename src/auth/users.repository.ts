@@ -54,7 +54,7 @@ export class UsersRepository {
 
   async update(
     id: number,
-    data: { email?: string; passwordHash?: string; passwordSalt?: string; name?: string },
+    data: { email?: string; passwordHash?: string; passwordSalt?: string; name?: string; phone?: string },
   ): Promise<void> {
     const fields: string[] = [];
     const values: any[] = [];
@@ -74,6 +74,10 @@ export class UsersRepository {
     if (data.name) {
       fields.push('name = ?');
       values.push(data.name);
+    }
+    if (data.phone) {
+      fields.push('phone = ?');
+      values.push(data.phone);
     }
 
     if (fields.length === 0) return;

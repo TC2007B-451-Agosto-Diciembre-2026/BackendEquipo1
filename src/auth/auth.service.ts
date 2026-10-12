@@ -89,6 +89,7 @@ export class AuthService {
       passwordHash?: string;
       passwordSalt?: string;
       name?: string;
+      phone?: string;
     } = {};
 
     if (dto.email) {
@@ -104,6 +105,7 @@ export class AuthService {
     }
 
     if (dto.name) updateData.name = dto.name;
+    if (dto.phone) updateData.phone = dto.phone;
 
     if (Object.keys(updateData).length === 0) {
       throw new BadRequestException('No se proporcionaron datos para actualizar');
