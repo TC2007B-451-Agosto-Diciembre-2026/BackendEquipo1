@@ -40,7 +40,9 @@ mysql -u root -p < db/seed.sql
 | usuario | daniela.ruiz@sentinel.test | Sentinel#2026 |
 | usuario | pedro.castillo@sentinel.test | Sentinel#2026 |
 
-Cambien estas contraseñas antes de exponer el servidor. Para generar el hash y la sal de un usuario nuevo: `node scripts/hash-password.mjs "<contraseña>"`.
+Cambien estas contraseñas antes de exponer el servidor.
+
+Si la API corre detrás de nginx, pongan `TRUST_PROXY=1` en `.env` para que el límite de intentos de login use la IP real del cliente y no la del proxy. Para generar el hash y la sal de un usuario nuevo: `node scripts/hash-password.mjs "<contraseña>"`.
 
 ## Documentación Interactiva (Swagger)
 

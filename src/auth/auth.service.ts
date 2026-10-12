@@ -41,10 +41,11 @@ export class AuthService {
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const user = await this.users.findByEmail(dto.email!);
     if (!user) {
-      throw new UnauthorizedException('El usuario no existe');
+      await scryptAsync(dto.password!, DUMMY_SALT, HASH_BYTES);
+      throw new UnauthorizedException('Credenciales inválidas');
     }
     if (!(await verifyPassword(dto.password!, user.passwordHash!, user.passwordSalt!))) {
-      throw new UnauthorizedException('Password incorrecto');
+      throw new UnauthorizedException('Credenciales inválidas');
     }
     const claims = { sub: user.id!, email: user.email!, role_id: Number(user.role_id!) };
     const accessToken = sign({ ...claims, type: 'access' }, ACCESS_TTL);
@@ -156,6 +157,7 @@ const scryptAsync = promisify(scrypt) as (
 ) => Promise<Buffer>;
 const SALT_BYTES = 16;
 const HASH_BYTES = 64;
+const DUMMY_SALT = randomBytes(SALT_BYTES).toString('hex');
 
 async function hashPassword(
   password: string,
