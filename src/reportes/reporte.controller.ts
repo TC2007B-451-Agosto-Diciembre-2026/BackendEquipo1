@@ -79,7 +79,7 @@ export class ReporteController {
       }),
     }),
   )
-  @ApiOperation({ summary: 'Subir o reemplazar la imagen de evidencia de un reporte' })
+  @ApiOperation({ summary: 'Adjuntar una imagen de evidencia a un reporte' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -131,6 +131,6 @@ export class ReporteController {
   @ApiOperation({ summary: 'Eliminar un reporte (Soft Delete)' })
   remove(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
     const userId = req.user.userId ?? req.user.id ?? req.user.sub;
-    return this.service.remove(id, userId, Number(req.user.role));
+    return this.service.remove(id, userId, Number(req.user.role_id));
   }
 }

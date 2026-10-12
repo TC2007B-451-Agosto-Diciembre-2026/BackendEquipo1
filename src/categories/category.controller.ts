@@ -28,8 +28,8 @@ export class CategoriesController {
 
     @Post()
     @ApiOperation({ summary: 'Crear una nueva categoría' })
-    create(@Body() CreateFraudTypeDto: CreateCategoryDto) {
-        return this.categoriesService.create(CreateFraudTypeDto);
+    create(@Body() createCategoryDto: CreateCategoryDto) {
+        return this.categoriesService.create(createCategoryDto);
     }
 
     @Get()

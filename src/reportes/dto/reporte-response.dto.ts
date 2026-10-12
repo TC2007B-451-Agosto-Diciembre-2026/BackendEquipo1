@@ -10,8 +10,8 @@ export class ReportResponseDto {
   @ApiPropertyOptional({ example: 2, nullable: true, description: 'ID del administrador que revisó el reporte' })
   adminId?: number | null;
 
-  @ApiProperty({ example: 1, description: 'ID del tipo de fraude' })
-  fraudTypeId!: number;
+  @ApiProperty({ example: 1, description: 'ID de la categoría' })
+  categoryId!: number;
 
   @ApiProperty({ example: 1, description: 'ID del estado de validación' })
   statusId!: number;
@@ -24,9 +24,6 @@ export class ReportResponseDto {
 
   @ApiProperty({ example: 'Se identificó un dominio malicioso que suplanta la identidad bancaria.', description: 'Descripción detallada' })
   description!: string;
-
-  @ApiPropertyOptional({ example: '/uploads/evidencia_1710000000.png', nullable: true, description: 'Ruta estática de la imagen' })
-  imageUrl?: string | null;
 
   @ApiPropertyOptional({ example: 85.50, nullable: true, description: 'Probabilidad estimada de fraude (0 a 100)' })
   fraudProbability?: number | null;

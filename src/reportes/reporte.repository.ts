@@ -6,7 +6,9 @@ import { UpdateReporteDto } from './dto/update-reporte.dto';
 import { Report } from './entities/reporte-entity';
 
 const COLUMNS = `
-  SELECT r.*, c.name AS category_name, s.name AS status_name, u.name AS reporter_name, u.email AS reporter_email FROM reports r LEFT JOIN categories c ON r.category_id = c.category_id 
+  SELECT r.*, c.name AS category_name, s.name AS status_name, u.name AS reporter_name, u.email AS reporter_email,
+  (SELECT e.content FROM evidence e WHERE e.report_id = r.report_id AND e.evidence_type = 'url' ORDER BY e.evidence_id LIMIT 1) AS evidence_url
+  FROM reports r LEFT JOIN categories c ON r.category_id = c.category_id
   LEFT JOIN validation_statuses s ON r.status_id = s.status_id LEFT JOIN users u ON r.user_id = u.user_id`;
 
 @Injectable()
@@ -34,10 +36,13 @@ export class ReporteRepository {
 
   async save(userId: number, dto: CreateReporteDto): Promise<Report> {
     const [result] = await this.pool.query<ResultSetHeader>(
-      `INSERT INTO reports (user_id, category_id, status_id, case_type, title, description, evidence_url)
-   VALUES (?, ?, 1, ?, ?, ?, ?)`,
-      [userId, dto.categoryId, dto.caseType, dto.title, dto.description, dto.evidenceUrl || null],
+      `INSERT INTO reports (user_id, category_id, status_id, case_type, title, description)
+   VALUES (?, ?, 1, ?, ?, ?)`,
+      [userId, dto.categoryId, dto.caseType, dto.title, dto.description],
     );
+    if (dto.evidenceUrl) {
+      await this.addEvidence(result.insertId, 'url', dto.evidenceUrl);
+    }
     return (await this.findById(result.insertId))!;
   }
 
@@ -80,11 +85,12 @@ export class ReporteRepository {
     );
   }
 
-  async updateImagePath(id: number, filename: string): Promise<void> {
-    await this.pool.query(
-      'UPDATE reports SET image_path = ? WHERE report_id = ? AND deleted_at IS NULL',
-      [filename, id],
+  async addEvidence(reportId: number, type: string, content: string): Promise<number> {
+    const [result] = await this.pool.query<ResultSetHeader>(
+      'INSERT INTO evidence (report_id, evidence_type, content) VALUES (?, ?, ?)',
+      [reportId, type, content],
     );
+    return result.insertId;
   }
 
   async updateStatus(
@@ -139,7 +145,6 @@ function toEntity(row: any): Report {
     title: row.title,
     evidenceUrl: row.evidence_url ?? row.evidenceUrl ?? null,
     description: row.description,
-    imagePath: row.image_path ?? null,
     fraudProbability: row.fraud_probability !== null && row.fraud_probability !== undefined 
       ? Number(row.fraud_probability) 
       : null,

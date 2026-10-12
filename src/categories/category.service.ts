@@ -8,11 +8,11 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 export class CategoriesService { 
     constructor(private readonly categoriesRepository: CategoriesRepository) {}
 
-     async create(createFraudTypeDto: CreateCategoryDto):Promise<categoryEntity> {
-        const id = await this.categoriesRepository.create(createFraudTypeDto.name);
+     async create(createCategoryDto: CreateCategoryDto):Promise<categoryEntity> {
+        const id = await this.categoriesRepository.create(createCategoryDto.name);
         return {
             category_id: id,
-            name: createFraudTypeDto.name,
+            name: createCategoryDto.name,
         };
      }
 
@@ -23,7 +23,7 @@ export class CategoriesService {
      async findOne(id:number): Promise<categoryEntity> {
         const item = await this.categoriesRepository.findById(id);
         if(!item) {
-            throw new NotFoundException(`Tipo de fraude con ID ${id} no encontrado`);
+            throw new NotFoundException(`Categoría con ID ${id} no encontrada`);
         }
         return item;
      }

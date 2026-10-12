@@ -12,7 +12,6 @@ export class Report {
   title!: string;
   evidenceUrl?: string | null; 
   description!: string;
-  imagePath?: string | null;
   fraudProbability?: number | null;
   createdAt!: Date;
   updatedAt!: Date;

@@ -40,10 +40,12 @@ export class ReporteService {
       throw new ForbiddenException('No tienes permiso para subir imagen a este reporte');
     }
 
-    await this.repository.updateImagePath(id, file.filename);
+    const imageUrl = `/uploads/${file.filename}`;
+    const evidenceId = await this.repository.addEvidence(id, 'image', imageUrl);
     return {
       message: 'Imagen adjuntada al reporte con éxito',
-      imageUrl: `/uploads/${file.filename}`,
+      evidenceId,
+      imageUrl,
     };
   }
 
