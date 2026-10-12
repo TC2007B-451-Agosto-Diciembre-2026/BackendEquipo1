@@ -1,6 +1,12 @@
 import { createHmac, Hmac } from "node:crypto";
 
-const SECRET = 'sentinel-secret-2026';
+function secret(): string {
+    const value = process.env.JWT_SECRET;
+    if (!value) {
+        throw new Error('Falta JWT_SECRET en .env');
+    }
+    return value;
+}
 
 export interface JwtPayload {
     sub: string;
@@ -20,7 +26,7 @@ function b64url(json: object): string {
 }
 
 function hmac(data: string): string {
-    return createHmac('sha256', SECRET).update(data).digest('base64url');
+    return createHmac('sha256', secret()).update(data).digest('base64url');
 }
 
 export function sign(

@@ -13,7 +13,10 @@ API REST construida con NestJS y MySQL para la gestión centralizada de usuarios
 # 1. Instalar dependencias
 npm install
 
-# 2. Iniciar servidor en modo desarrollo
+# 2. Crear .env a partir del ejemplo y llenar JWT_SECRET y DATABASE_URL
+cp .env.example .env
+
+# 3. Iniciar servidor en modo desarrollo
 npm run start:dev
 ```
 
