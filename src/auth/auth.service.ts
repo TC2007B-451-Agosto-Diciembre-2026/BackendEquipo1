@@ -133,7 +133,10 @@ export class AuthService {
     }));
   }
 
-  async updateUserRole(userId: number, roleStr: string) {
+  async updateUserRole(userId: number, roleStr: string, currentUserId: number) {
+    if (userId === currentUserId) {
+      throw new BadRequestException('No puedes cambiar tu propio rol');
+    }
     const user = await this.users.findById(userId);
     if (!user) {
       throw new NotFoundException(`Usuario #${userId} no encontrado`);
