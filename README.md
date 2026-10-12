@@ -56,6 +56,7 @@ Puedes acceder a la documentación interactiva OpenAPI y probar los endpoints de
 | --- | --- | --- | --- |
 | POST | `/auth/register`, `/auth/login`, `/auth/refresh` | Público (con límite de intentos) | Registro, login y renovación del token |
 | GET, PATCH, DELETE | `/auth/me` | Usuario | Perfil propio |
+| GET | `/public/reports`, `/public/reports/:id`, `/public/categories` | Público (60 por minuto por IP) | Reportes aprobados sin datos del autor y categorías, para la app sin sesión |
 | GET | `/reports` | Usuario / Admin | Usuario: solo aprobados, sin datos del autor. Admin: todos |
 | GET | `/reports/mis-reportes` | Usuario | Reportes propios |
 | GET | `/reports/:id` | Usuario / Admin | El propio, uno aprobado o cualquiera si es admin |
