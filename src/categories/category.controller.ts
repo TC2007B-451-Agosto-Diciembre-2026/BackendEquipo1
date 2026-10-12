@@ -33,12 +33,14 @@ export class CategoriesController {
     }
 
     @Get()
+    @Roles(Role.ADMIN, Role.USER)
     @ApiOperation({ summary: 'Listar todas las categorías' })
     findAll() {
         return this.categoriesService.findAll();
     }
 
     @Get(':id')
+    @Roles(Role.ADMIN, Role.USER)
     @ApiOperation({ summary: 'Buscar una categoria en específico' })
     findOne(@Param('id', ParseIntPipe) id: number) {
     return this.categoriesService.findOne(id);
