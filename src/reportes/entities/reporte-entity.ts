@@ -2,7 +2,7 @@ export class Report {
   id!: number;
   userId!: number;
   adminId?: number | null;
-  fraudTypeId!: number;
+  categoryId!: number;
   statusId!: number;
   caseType!: string;
   title!: string;

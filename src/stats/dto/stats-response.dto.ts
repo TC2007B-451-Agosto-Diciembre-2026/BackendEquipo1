@@ -14,14 +14,14 @@ export class SummaryStatsDto {
   rejectedReports!: number;
 }
 
-export class FraudTypeStatsDto {
-  @ApiProperty({ example: 1, description: 'ID del tipo de fraude' })
-  fraudTypeId!: number;
+export class CategoryStatsDto {
+  @ApiProperty({ example: 1, description: 'ID de la categoría' })
+  categoryId!: number;
 
-  @ApiProperty({ example: 'Fotocívica falsa', description: 'Nombre del tipo de fraude' })
-  fraudTypeName!: string;
+  @ApiProperty({ example: 'Circulación y seguridad', description: 'Nombre de la categoría' })
+  categoryName!: string;
 
-  @ApiProperty({ example: 45, description: 'Total de reportes de este tipo de fraude' })
+  @ApiProperty({ example: 45, description: 'Total de reportes en esta categoría' })
   total!: number;
 }
 

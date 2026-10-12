@@ -57,7 +57,7 @@ export class ReporteService {
     }
 
     if (
-      dto.fraudTypeId === undefined &&
+      dto.categoryId === undefined &&
       !dto.caseType &&
       !dto.title &&
       !dto.description

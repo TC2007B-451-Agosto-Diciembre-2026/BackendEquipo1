@@ -1,0 +1,115 @@
+-- =====================================================================
+-- SENTINEL - Datos de ejemplo
+-- Se ejecuta DESPUÉS de db/schema.sql (que crea las tablas y los catálogos
+-- roles, validation_statuses y categories).
+--
+-- Todos los datos son ficticios: dominios .example / .test (reservados)
+-- y teléfonos 55 0000 xxxx.
+--
+-- Cuentas de prueba (cada una con su propia sal; generadas con
+-- scripts/hash-password.mjs):
+--   admin   laura.mendez@sentinel.test    Admin#2026
+--   admin   ricardo.salas@sentinel.test   Admin#2026
+--   usuario mafer.lopez@sentinel.test     Sentinel#2026
+--   usuario jose.hernandez@sentinel.test  Sentinel#2026
+--   usuario daniela.ruiz@sentinel.test    Sentinel#2026
+--   usuario pedro.castillo@sentinel.test  Sentinel#2026
+-- Cambien estas contraseñas antes de exponer el servidor (pentesting/UAT).
+-- =====================================================================
+SET NAMES utf8mb4;
+USE sentinel;
+
+-- ---------------------------------------------------------------------
+-- users: 2 administradores (role_id 1) y 4 usuarios (role_id 2).
+-- Relación 1:N roles -> users.
+-- ---------------------------------------------------------------------
+INSERT INTO users (user_id, role_id, name, email, password_hash, password_salt, phone, created_at) VALUES
+(1, 1, 'Laura Méndez Ortiz', 'laura.mendez@sentinel.test',
+ '89e38437eac477d5ece488a2151a12dcbb8074f1c9aeadec6bf121a01ca2a2470e7addd311b45aff038e21f5e9bcbfe9ff3095d8f234b997c03e442ce3ee7f25',
+ '68024fe0ad2a928b4e242052e7e63f8d', NULL, '2026-08-01 09:00:00'),
+(2, 1, 'Ricardo Salas Vega', 'ricardo.salas@sentinel.test',
+ 'a467dc46aa2053172ba2d7d736510282837b08e1432b191bf61b3e2c9658fdcf4df4ced8fe5e9cda6e809bc0c31804f6b662355acb1224b5144b47610071fa3f',
+ 'cdc6ffe73d463a7fe03a76feb7702b55', NULL, '2026-08-01 09:05:00'),
+(3, 2, 'María Fernanda López Ruiz', 'mafer.lopez@sentinel.test',
+ 'f896d747840e7eebfc6c27dd6125faec34b905156ec12c8388e57f5b4dae40b73274002c7ac323b2bfa55a650c7205a785416704301e6bf54d5a3434a84b28f7',
+ 'b6e795f782ca9d6bafb3b8249d3e370f', '5500000101', '2026-08-10 18:22:00'),
+(4, 2, 'José Hernández Cruz', 'jose.hernandez@sentinel.test',
+ 'df45c610592e390eb6c8c6ac513b68c9a7755efb0522c23399557c20d778f9a111607cfd47bacb659479b354faa29a2ea396360d12de8bdf3a12d3e6f12e22c3',
+ '8893403e52902bd10ae6d9d900dda835', NULL, '2026-08-18 12:40:00'),
+(5, 2, 'Daniela Ruiz Torres', 'daniela.ruiz@sentinel.test',
+ 'bd4a06137e43a95567a31fbd808b37490122dfa8ad2c8ea943b3b5d5264dbc763b71e36b05ebf7415f597be22c8be79bae0a7b29857b977639c8ee20b579b9ac',
+ 'e67b927fed456458f938593fbd8917ef', '5500000102', '2026-09-05 08:15:00'),
+(6, 2, 'Pedro Castillo Núñez', 'pedro.castillo@sentinel.test',
+ 'b320334adbbdfbe6732722fde136f0dca9b3184f987ffe86d6f1190c0cd74c018f02003d09877bd03a233640c8603930b103e61318e56e87bf45a7628bcf6d9c',
+ 'ab424f2506b177aaca4f6fe8528a2dfe', '5500000103', '2026-09-20 20:30:00');
+
+-- ---------------------------------------------------------------------
+-- reports: reportes (víctimas) y señalamientos (posibles víctimas).
+-- Cubre los 3 estados, las 3 categorías y ambos case_type.
+-- Relaciones 1:N: users -> reports (autor), users -> reports (admin que
+-- revisó), categories -> reports y validation_statuses -> reports.
+-- Reglas que reflejan los datos:
+--   * pendiente (1): sin admin_id, sin approved_at ni fraud_probability.
+--   * aprobado (2) / rechazado (3): admin_id, approved_at y fraud_probability.
+--   * El reporte 9 tiene deleted_at (borrado lógico por su autor).
+-- ---------------------------------------------------------------------
+INSERT INTO reports (report_id, user_id, admin_id, category_id, status_id, case_type, title, description, fraud_probability, created_at, approved_at, deleted_at) VALUES
+(1, 3, 1, 2, 2, 'report',
+ 'Pagué una fotocívica falsa que llegó por SMS',
+ 'Recibí un SMS que decía que tenía una fotocívica pendiente con descuento si pagaba ese mismo día. Entré al enlace, pagué $1,245 con tarjeta y después vi que en el portal oficial no tenía ninguna infracción.',
+ 92.50, '2026-08-12 10:14:00', '2026-08-13 16:02:00', NULL),
+(2, 3, NULL, 1, 1, 'señalamiento',
+ '¿Es real este correo de multa de tránsito?',
+ 'Me llegó un correo con el logo de la Secretaría de Movilidad diciendo que tengo una multa por exceso de velocidad. El enlace para pagar es una liga acortada. No he pagado.',
+ NULL, '2026-09-03 21:47:00', NULL, NULL),
+(3, 4, 2, 1, 2, 'report',
+ 'Depósito por multa falsa solicitado por WhatsApp',
+ 'Un supuesto agente de tránsito me escribió por WhatsApp con una foto de mi placa y me pidió depositar $2,800 en una cuenta personal para no remitir mi auto al corralón. Hice el depósito.',
+ 88.00, '2026-08-20 13:05:00', '2026-08-21 10:30:00', NULL),
+(4, 4, 1, 2, 3, 'señalamiento',
+ 'Notificación de fotocívica en el portal oficial',
+ 'Vi una fotocívica a mi nombre y no sabía si era legítima. La consulté en el sitio oficial del gobierno y coincide con la fecha en que pasé por esa avenida.',
+ 12.00, '2026-09-10 09:20:00', '2026-09-10 17:45:00', NULL),
+(5, 5, NULL, 3, 1, 'report',
+ 'Llamada de supuesto agente pidiendo pago inmediato',
+ 'Me llamaron diciendo que mi licencia sería suspendida por multas acumuladas y que debía pagar en una tienda de conveniencia en menos de una hora. Pagué $950 antes de colgar.',
+ NULL, '2026-09-22 19:33:00', NULL, NULL),
+(6, 5, 2, 2, 2, 'señalamiento',
+ 'Página que ofrece 50 % de descuento en fotocívicas',
+ 'Encontré un anuncio en redes sociales que ofrece pagar fotocívicas con 50 % de descuento solo hoy. El dominio no es gubernamental.',
+ 95.00, '2026-09-28 11:10:00', '2026-09-29 09:00:00', NULL),
+(7, 6, 1, 1, 3, 'report',
+ 'Cobro de multa que no reconozco',
+ 'Me aparece un cargo en mi tarjeta con concepto de multa de tránsito. No guardé ningún mensaje ni comprobante del supuesto pago.',
+ 30.00, '2026-10-01 08:55:00', '2026-10-02 12:20:00', NULL),
+(8, 6, NULL, 1, 1, 'señalamiento',
+ 'Mensaje de "último aviso" de multa con liga acortada',
+ 'Recibí un SMS de "último aviso" por una multa de estacionamiento con una liga acortada para pagar. No lo abrí.',
+ NULL, '2026-10-02 07:40:00', NULL, NULL),
+(9, 3, NULL, 2, 1, 'report',
+ 'Fotocívica falsa (duplicado)',
+ 'Lo registré dos veces por error; es el mismo caso del reporte anterior.',
+ NULL, '2026-08-12 10:20:00', NULL, '2026-08-12 10:25:00');
+
+-- ---------------------------------------------------------------------
+-- evidence: par tipo + contenido. Relación 1:N reports -> evidence
+-- (el reporte 1 tiene 3 evidencias; el 8 ninguna).
+-- Para 'image', content es el link al objeto en el bucket local de MinIO
+-- (servicio "storage", bucket "evidence"). Estos archivos no existen
+-- todavía en el bucket; suban imágenes con esas rutas si quieren verlas.
+-- ---------------------------------------------------------------------
+INSERT INTO evidence (evidence_id, report_id, evidence_type, content, created_at) VALUES
+(1, 1, 'text',  'SEMOVI: Tiene una fotocivica pendiente por $1,245. Pague HOY con 30% de descuento y evite recargos: http://semovi-pagos.example/fotocivica?folio=88213', '2026-08-12 10:14:00'),
+(2, 1, 'url',   'http://semovi-pagos.example/fotocivica?folio=88213', '2026-08-12 10:14:00'),
+(3, 1, 'image', 'http://storage:9000/evidence/reports/1/captura-sms.jpg', '2026-08-12 10:15:00'),
+(4, 2, 'url',   'https://acortador.example/mUlt4cdmx', '2026-09-03 21:47:00'),
+(5, 2, 'image', 'http://storage:9000/evidence/reports/2/correo-multa.png', '2026-09-03 21:48:00'),
+(6, 3, 'phone', '5500000201', '2026-08-20 13:05:00'),
+(7, 3, 'text',  'Buenas tardes, soy oficial de tránsito. Su vehículo tiene una infracción; deposite $2,800 a la cuenta que le envío para evitar el corralón.', '2026-08-20 13:05:00'),
+(8, 3, 'image', 'http://storage:9000/evidence/reports/3/comprobante-deposito.jpg', '2026-08-20 13:06:00'),
+(9, 4, 'url',   'https://www.semovi.cdmx.gob.mx', '2026-09-10 09:20:00'),
+(10, 5, 'phone', '5500000202', '2026-09-22 19:33:00'),
+(11, 6, 'url',   'http://fotocivicas-descuento.example/pago', '2026-09-28 11:10:00'),
+(12, 6, 'image', 'http://storage:9000/evidence/reports/6/anuncio-descuento.png', '2026-09-28 11:11:00'),
+(13, 7, 'text',  'Cargo en tarjeta: "PAGO MULTA TRANSITO" por $1,500 el 30/09/2026.', '2026-10-01 08:55:00'),
+(14, 9, 'image', 'http://storage:9000/evidence/reports/9/captura-sms.jpg', '2026-08-12 10:20:00');

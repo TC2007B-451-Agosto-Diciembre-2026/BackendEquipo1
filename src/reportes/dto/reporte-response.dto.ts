@@ -10,8 +10,8 @@ export class ReportResponseDto {
   @ApiPropertyOptional({ example: 2, nullable: true, description: 'ID del administrador que revisó el reporte' })
   adminId?: number | null;
 
-  @ApiProperty({ example: 1, description: 'ID del tipo de fraude' })
-  fraudTypeId!: number;
+  @ApiProperty({ example: 1, description: 'ID de la categoría' })
+  categoryId!: number;
 
   @ApiProperty({ example: 1, description: 'ID del estado de validación' })
   statusId!: number;

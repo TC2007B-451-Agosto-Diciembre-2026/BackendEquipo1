@@ -23,19 +23,19 @@ export class StatsRepository {
       }
     }
 
-    async getByFraudType() {
+    async getByCategory() {
         const [rows] = await this.pool.query<RowDataPacket[]>(`SELECT 
-        f.fraud_type_id AS fraudTypeId,
-        f.name AS fraudTypeName,
+        c.category_id AS categoryId,
+        c.name AS categoryName,
         COUNT(r.report_id) AS total
-        FROM fraud_types f
-        LEFT JOIN reports r ON f.fraud_type_id = r.fraud_type_id AND r.deleted_at IS NULL
-        GROUP BY f.fraud_type_id, f.name
+        FROM categories c
+        LEFT JOIN reports r ON c.category_id = r.category_id AND r.deleted_at IS NULL
+        GROUP BY c.category_id, c.name
         ORDER BY total DESC`);
 
         return rows.map((row) => ({ 
-            fraudTypeId: row.fraudTypeId,
-            fraudTypeName: row.fraudTypeName,
+            categoryId: row.categoryId,
+            categoryName: row.categoryName,
             total: Number(row.total),
          }));
     }

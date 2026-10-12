@@ -34,9 +34,9 @@ export class ReporteRepository {
 
   async save(userId: number, dto: CreateReporteDto): Promise<Report> {
     const [result] = await this.pool.query<ResultSetHeader>(
-      `INSERT INTO reports (user_id, fraud_type_id, status_id, case_type, title, description)
+      `INSERT INTO reports (user_id, category_id, status_id, case_type, title, description)
    VALUES (?, ?, 1, ?, ?, ?)`,
-      [userId, dto.fraudTypeId, dto.caseType, dto.title, dto.description],
+      [userId, dto.categoryId, dto.caseType, dto.title, dto.description],
     );
     return (await this.findById(result.insertId))!;
   }
@@ -45,9 +45,9 @@ export class ReporteRepository {
     const fields: string[] = [];
     const values: any[] = [];
 
-    if (dto.fraudTypeId !== undefined) {
-      fields.push('fraud_type_id = ?');
-      values.push(dto.fraudTypeId);
+    if (dto.categoryId !== undefined) {
+      fields.push('category_id = ?');
+      values.push(dto.categoryId);
     }
     if (dto.caseType !== undefined) {
       fields.push('case_type = ?');
@@ -106,7 +106,7 @@ function toEntity(row: any): Report {
     id: row.report_id,
     userId: row.user_id,
     adminId: row.admin_id,
-    fraudTypeId: row.fraud_type_id,
+    categoryId: row.category_id,
     statusId: row.status_id,
     caseType: row.case_type,
     title: row.title,

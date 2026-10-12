@@ -2,7 +2,7 @@ import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
 import {
-  FraudTypeStatsDto,
+  CategoryStatsDto,
   MonthlyStatsDto,
   StatusStatsDto,
   SummaryStatsDto,
@@ -26,14 +26,14 @@ export class StatsController {
     return this.service.getSummary();
   }
 
-  @Get('by-fraud-type')
-  @ApiOperation({ summary: 'Obtener distribución de reportes por tipo de fraude' })
+  @Get('by-category')
+  @ApiOperation({ summary: 'Obtener distribución de reportes por categoría' })
   @ApiOkResponse({
-    description: 'Conteo de reportes desglosado por tipo de fraude',
-    type: [FraudTypeStatsDto],
+    description: 'Conteo de reportes desglosado por categoría',
+    type: [CategoryStatsDto],
   })
-  getByFraudType() {
-    return this.service.getByFraudType();
+  getByCategory() {
+    return this.service.getByCategory();
   }
 
   @Get('by-status')
