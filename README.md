@@ -50,16 +50,25 @@ Puedes acceder a la documentación interactiva OpenAPI y probar los endpoints de
 * **Swagger UI:** [http://localhost:3000/docs](http://localhost:3000/docs)
 * **OpenAPI JSON:** [http://localhost:3000/docs-json](http://localhost:3000/docs-json)
 
-##Principales Endpoints
+## Principales Endpoints
 
-| Método |     Ruta     | Autenticación |                     Descripción                 |
-| ---    |      ---     |     ---       |                        ---                      |
-| GET    |   `/roles`   | No            | Lista todos los roles disponibles               |
-| POST   |   `/roles`   | No            | Registra un nuevo rol                           |
-| GET    | `/roles/:id` | No            | Obtiene los detalles de un rol específico       |
-| GET    |  `/reports`  | Bearer Token  | Obtiene la lista de reportes                    |
-| POST   |  `/reports`  | Bearer Token  | Crea un nuevo reporte                           |
-| GET    |`/reports/:id`| Bearer Token  | Consulta un reporte específico mediante su UUID |
+| Método | Ruta | Acceso | Descripción |
+| --- | --- | --- | --- |
+| POST | `/auth/register`, `/auth/login`, `/auth/refresh` | Público (con límite de intentos) | Registro, login y renovación del token |
+| GET, PATCH, DELETE | `/auth/me` | Usuario | Perfil propio |
+| GET | `/reports` | Usuario / Admin | Usuario: solo aprobados, sin datos del autor. Admin: todos |
+| GET | `/reports/mis-reportes` | Usuario | Reportes propios |
+| GET | `/reports/:id` | Usuario / Admin | El propio, uno aprobado o cualquiera si es admin |
+| POST | `/reports` | Usuario | Crea un reporte o señalamiento |
+| PATCH, DELETE | `/reports/:id` | Autor / Admin | Edita (solo el autor) o borra (borrado lógico) |
+| POST | `/reports/:id/image` | Autor | Adjunta una imagen JPG o PNG (máx. 5 MB) |
+| GET | `/reports/:id/evidence` | Autor / Admin | Evidencias; las imágenes traen una URL firmada de 5 minutos |
+| GET | `/evidence/:id?exp=&sig=` | URL firmada | Descarga la imagen |
+| PATCH | `/reports/:id/status` | Admin | Cambia el estado y la probabilidad de fraude |
+| GET, PATCH | `/reports/deleted`, `/reports/:id/restore` | Admin | Papelera |
+| GET, PATCH | `/users`, `/users/:id/role` | Admin | Usuarios y cambio de rol |
+| CRUD | `/roles`, `/categories`, `/validation-statuses` | Admin | Catálogos |
+| GET | `/stats/*` | Usuario / Admin | Estadísticas |
 
 ## Estructura del Proyecto
 

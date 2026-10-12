@@ -53,8 +53,6 @@ export class ReporteRepository {
   }
 
   async update(id: number, dto: UpdateReporteDto): Promise<void> {
-    console.log('📦 DTO recibido en el repositorio:', dto);
-
     const fields: string[] = [];
     const values: any[] = [];
 

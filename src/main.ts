@@ -21,20 +21,23 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  if (process.env.NODE_ENV !== 'production') {
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('docs', app, document);
+  }
 
   app.enableCors();
 
-  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
-  console.log('API en http://localhost:3000 y en ' + lanUrls().join(', '));
+  const port = Number(process.env.PORT ?? 3000);
+  await app.listen(port, '0.0.0.0');
+  console.log(`API en http://localhost:${port} y en ` + lanUrls(port).join(', '));
 }
 
-function lanUrls(): string[] {
+function lanUrls(port: number): string[] {
   return Object.values(networkInterfaces())
     .flat()
     .filter((i) => i && i.family === 'IPv4' && !i.internal)
-    .map((i) => 'http://' + i!.address + ':3000');
+    .map((i) => `http://${i!.address}:${port}`);
 }
 
 bootstrap();
