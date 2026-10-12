@@ -8,13 +8,39 @@ import { ChangeStatusDto } from './dto/change-status.dto';
 import { CreateReporteDto } from './dto/create-reporte.dto';
 import { UpdateReporteDto } from './dto/update-reporte.dto';
 import { ReporteRepository } from './reporte.repository';
+import { Report } from './entities/reporte-entity';
+import { Role } from '../auth/roles.enum';
 
 @Injectable()
 export class ReporteService {
   constructor(private readonly repository: ReporteRepository) {}
 
-  async findAll() {
-    return this.repository.findAll();
+  async findAll(roleId: number) {
+    if (roleId === Role.ADMIN) {
+      return this.repository.findAll();
+    }
+    const reports = await this.repository.findApproved();
+    return reports.map(toPublic);
+  }
+
+  async findVisible(id: number, userId: number, roleId: number) {
+    const report = await this.repository.findById(id);
+    if (!report) {
+      throw new NotFoundException(`Reporte con ID ${id} no encontrado`);
+    }
+    if (roleId === Role.ADMIN) {
+      return report;
+    }
+    if (report.deletedAt) {
+      throw new NotFoundException(`Reporte con ID ${id} no encontrado`);
+    }
+    if (report.userId === userId) {
+      return report;
+    }
+    if (report.statusId !== 2) {
+      throw new NotFoundException(`Reporte con ID ${id} no encontrado`);
+    }
+    return toPublic(report);
   }
 
   async findMyReports(userId: number) {
@@ -103,4 +129,9 @@ export class ReporteService {
     await this.repository.restore(id);
     return { message: 'Reporte restaurado con éxito' };
   }
+}
+
+function toPublic(report: Report) {
+  const { userId, adminId, reporterName, reporterEmail, ...rest } = report;
+  return rest;
 }

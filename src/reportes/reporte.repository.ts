@@ -21,6 +21,12 @@ export class ReporteRepository {
     return rows.map(toEntity);
   }
 
+  async findApproved(): Promise<Report[]> {
+    const query = `${COLUMNS} WHERE r.deleted_at IS NULL AND r.status_id = 2 ORDER BY r.created_at DESC;`;
+    const [rows]: any = await this.pool.query(query);
+    return rows.map(toEntity);
+  }
+
   async findByUserId(userId: number): Promise<Report[]> {
     const query = ` ${COLUMNS} WHERE r.user_id = ? AND r.deleted_at IS NULL ORDER BY r.created_at DESC;`;
     const [rows]: any = await this.pool.query(query, [userId]);

@@ -36,8 +36,8 @@ export class ReporteController {
   @Get()
   @Roles(Role.ADMIN, Role.USER)
   @ApiOperation({ summary: 'Listar todos los reportes activos' })
-  findAll() {
-    return this.service.findAll();
+  findAll(@Req() req: any) {
+    return this.service.findAll(Number(req.user.role_id));
   }
 
   @Get('deleted')
@@ -56,8 +56,9 @@ export class ReporteController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener detalle de un reporte en especifico' })
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.service.findOne(id);
+  findOne(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    const userId = req.user.userId ?? req.user.id ?? req.user.sub;
+    return this.service.findVisible(id, userId, Number(req.user.role_id));
   }
 
   @Post()
