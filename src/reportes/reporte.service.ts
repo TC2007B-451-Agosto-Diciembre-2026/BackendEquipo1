@@ -28,6 +28,19 @@ export class ReporteService {
     return reports.map(toPublic);
   }
 
+  async findPublic() {
+    const reports = await this.repository.findApproved();
+    return reports.map(toPublic);
+  }
+
+  async findPublicOne(id: number) {
+    const report = await this.repository.findById(id);
+    if (!report || report.deletedAt || report.statusId !== 2) {
+      throw new NotFoundException(`Reporte con ID ${id} no encontrado`);
+    }
+    return toPublic(report);
+  }
+
   async findVisible(id: number, userId: number, roleId: number) {
     const report = await this.repository.findById(id);
     if (!report) {
