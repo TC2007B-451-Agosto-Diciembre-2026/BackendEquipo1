@@ -1,18 +1,18 @@
+import './load-env';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { networkInterfaces } from 'node:os';
-import { join } from 'node:path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-
-  
-  app.useStaticAssets(join(process.cwd(), 'uploads'), { prefix: '/uploads/' });
+  if (process.env.TRUST_PROXY) {
+    app.set('trust proxy', Number(process.env.TRUST_PROXY));
+  }
 
   const config = new DocumentBuilder()
     .setTitle('API Sistema de Reportes y Roles')
@@ -21,20 +21,23 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  if (process.env.NODE_ENV !== 'production') {
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('docs', app, document);
+  }
 
   app.enableCors();
 
-  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
-  console.log('API en http://localhost:3000 y en ' + lanUrls().join(', '));
+  const port = Number(process.env.PORT ?? 3000);
+  await app.listen(port, '0.0.0.0');
+  console.log(`API en http://localhost:${port} y en ` + lanUrls(port).join(', '));
 }
 
-function lanUrls(): string[] {
+function lanUrls(port: number): string[] {
   return Object.values(networkInterfaces())
     .flat()
     .filter((i) => i && i.family === 'IPv4' && !i.internal)
-    .map((i) => 'http://' + i!.address + ':3000');
+    .map((i) => `http://${i!.address}:${port}`);
 }
 
 bootstrap();

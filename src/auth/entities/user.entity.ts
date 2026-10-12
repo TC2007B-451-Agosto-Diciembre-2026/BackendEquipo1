@@ -4,6 +4,8 @@ export class User {
     name: string | undefined;
     email: string | undefined;
     passwordHash: string | undefined;
+    passwordSalt: string | undefined;
+    phone: string | undefined;
     createdAt: Date | undefined;
     updatedAt: Date | undefined;
     deletedAt: Date | undefined;

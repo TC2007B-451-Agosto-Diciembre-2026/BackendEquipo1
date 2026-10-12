@@ -39,12 +39,12 @@ export class RolesRepository {
     await this.pool.query('DELETE FROM roles WHERE role_id = ?', [id]);
   }
 
-async assignRole(userId: number, roleId: number): Promise<boolean> {
-    const [result] = await this.pool.query<ResultSetHeader>(
-      'UPDATE users SET role_id = ? WHERE user_id = ? AND deleted_at IS NULL',
-      [roleId, userId],
+  async countUsersWithRole(id: number): Promise<number> {
+    const [rows] = await this.pool.query<RowDataPacket[]>(
+      'SELECT COUNT(*) AS count FROM users WHERE role_id = ? AND deleted_at IS NULL',
+      [id],
     );
-    return result.affectedRows > 0;
+    return Number(rows[0].count);
   }
 
 }

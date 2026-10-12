@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
@@ -18,11 +19,13 @@ import { AuthGuard } from './auth.guard';
 import { CurrentUser } from './current-user.decorator';
 
 @ApiTags('auth')
+@UseGuards(ThrottlerGuard)
 @Controller('auth')
 export class AuthController {
   constructor(private readonly service: AuthService) {}
 
   @Post('register')
+  @Throttle({ default: { limit: () => Number(process.env.LOGIN_RATE_LIMIT ?? 5), ttl: 60_000 } })
   @ApiOperation({ summary: 'Registrar un nuevo usuario' })
   @ApiResponse({ status: 201, description: 'Usuario registrado exitosamente' })
   @ApiResponse({ status: 409, description: 'El email ya está registrado' })
@@ -32,9 +35,11 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(200)
+  @Throttle({ default: { limit: () => Number(process.env.LOGIN_RATE_LIMIT ?? 5), ttl: 60_000 } })
   @ApiOperation({ summary: 'Iniciar sesión y obtener tokens' })
   @ApiResponse({ status: 200, description: 'Inicio de sesión exitoso' })
   @ApiResponse({ status: 401, description: 'Credenciales inválidas' })
+  @ApiResponse({ status: 429, description: 'Demasiados intentos' })
   login(@Body() dto: LoginDto) {
     return this.service.login(dto);
   }

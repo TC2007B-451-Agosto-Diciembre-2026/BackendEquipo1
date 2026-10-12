@@ -28,17 +28,19 @@ export class CategoriesController {
 
     @Post()
     @ApiOperation({ summary: 'Crear una nueva categoría' })
-    create(@Body() CreateFraudTypeDto: CreateCategoryDto) {
-        return this.categoriesService.create(CreateFraudTypeDto);
+    create(@Body() createCategoryDto: CreateCategoryDto) {
+        return this.categoriesService.create(createCategoryDto);
     }
 
     @Get()
+    @Roles(Role.ADMIN, Role.USER)
     @ApiOperation({ summary: 'Listar todas las categorías' })
     findAll() {
         return this.categoriesService.findAll();
     }
 
     @Get(':id')
+    @Roles(Role.ADMIN, Role.USER)
     @ApiOperation({ summary: 'Buscar una categoria en específico' })
     findOne(@Param('id', ParseIntPipe) id: number) {
     return this.categoriesService.findOne(id);

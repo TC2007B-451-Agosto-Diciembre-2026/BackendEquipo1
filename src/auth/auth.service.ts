@@ -5,7 +5,8 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { createHash } from 'node:crypto';
+import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
+import { promisify } from 'node:util';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -24,11 +25,13 @@ export class AuthService {
     if (await this.users.findByEmail(dto.email!)) {
       throw new ConflictException('El email ya está registrado');
     }
+    const { passwordHash, passwordSalt } = await hashPassword(dto.password!);
     const user = await this.users.save({
       email: dto.email!,
-      passwordHash: hash(dto.password!),
+      passwordHash,
+      passwordSalt,
       name: dto.name!,
-      role_Id: 2,
+      phone: dto.phone,
     });
     return { id: Number(user.id), email: user.email! };
   }
@@ -38,10 +41,11 @@ export class AuthService {
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const user = await this.users.findByEmail(dto.email!);
     if (!user) {
-      throw new UnauthorizedException('El usuario no existe');
+      await scryptAsync(dto.password!, DUMMY_SALT, HASH_BYTES);
+      throw new UnauthorizedException('Credenciales inválidas');
     }
-    if (user.passwordHash !== hash(dto.password!)) {
-      throw new UnauthorizedException('Password incorrecto');
+    if (!(await verifyPassword(dto.password!, user.passwordHash!, user.passwordSalt!))) {
+      throw new UnauthorizedException('Credenciales inválidas');
     }
     const claims = { sub: user.id!, email: user.email!, role_id: Number(user.role_id!) };
     const accessToken = sign({ ...claims, type: 'access' }, ACCESS_TTL);
@@ -49,13 +53,17 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  refresh(dto: RefreshDto): { accessToken: string } {
+  async refresh(dto: RefreshDto): Promise<{ accessToken: string }> {
     const payload = verify(dto.refreshToken!);
     if (!payload || payload.type !== 'refresh') {
       throw new UnauthorizedException('Refresh token inválido');
     }
+    const user = await this.users.findById(Number(payload.sub));
+    if (!user) {
+      throw new UnauthorizedException('Refresh token inválido');
+    }
     const accessToken = sign(
-      { sub: payload.sub, email: payload.email, role_id: payload.role_id, type: 'access' },
+      { sub: payload.sub, email: user.email!, role_id: Number(user.role_id), type: 'access' },
       ACCESS_TTL,
     );
     return { accessToken };
@@ -66,7 +74,7 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
     }
-    const { passwordHash, ...profile } = user;
+    const { passwordHash, passwordSalt, ...profile } = user;
     return profile;
   }
 
@@ -76,7 +84,13 @@ export class AuthService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    const updateData: { email?: string; passwordHash?: string; name?: string } = {};
+    const updateData: {
+      email?: string;
+      passwordHash?: string;
+      passwordSalt?: string;
+      name?: string;
+      phone?: string;
+    } = {};
 
     if (dto.email) {
       const existing = await this.users.findByEmail(dto.email);
@@ -87,10 +101,11 @@ export class AuthService {
     }
 
     if (dto.password) {
-      updateData.passwordHash = hash(dto.password);
+      Object.assign(updateData, await hashPassword(dto.password));
     }
 
     if (dto.name) updateData.name = dto.name;
+    if (dto.phone) updateData.phone = dto.phone;
 
     if (Object.keys(updateData).length === 0) {
       throw new BadRequestException('No se proporcionaron datos para actualizar');
@@ -120,7 +135,10 @@ export class AuthService {
     }));
   }
 
-  async updateUserRole(userId: number, roleStr: string) {
+  async updateUserRole(userId: number, roleStr: string, currentUserId: number) {
+    if (userId === currentUserId) {
+      throw new BadRequestException('No puedes cambiar tu propio rol');
+    }
     const user = await this.users.findById(userId);
     if (!user) {
       throw new NotFoundException(`Usuario #${userId} no encontrado`);
@@ -137,6 +155,29 @@ export class AuthService {
   }
 }
 
-function hash(password: string): string {
-  return createHash('sha256').update(password).digest('hex');
+const scryptAsync = promisify(scrypt) as (
+  password: string,
+  salt: string,
+  keylen: number,
+) => Promise<Buffer>;
+const SALT_BYTES = 16;
+const HASH_BYTES = 64;
+const DUMMY_SALT = randomBytes(SALT_BYTES).toString('hex');
+
+async function hashPassword(
+  password: string,
+): Promise<{ passwordHash: string; passwordSalt: string }> {
+  const passwordSalt = randomBytes(SALT_BYTES).toString('hex');
+  const hash = await scryptAsync(password, passwordSalt, HASH_BYTES);
+  return { passwordHash: hash.toString('hex'), passwordSalt };
+}
+
+async function verifyPassword(
+  password: string,
+  storedHash: string,
+  salt: string,
+): Promise<boolean> {
+  const hash = await scryptAsync(password, salt, HASH_BYTES);
+  const stored = Buffer.from(storedHash, 'hex');
+  return stored.length === hash.length && timingSafeEqual(stored, hash);
 }
