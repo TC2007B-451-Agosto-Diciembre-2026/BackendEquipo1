@@ -18,6 +18,7 @@ import { diskStorage } from 'multer';
 import { extname } from 'node:path';
 import { ApiBearerAuth, ApiOperation, ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
 import { ChangeStatusDto } from './dto/change-status.dto';
 import { CreateReporteDto } from './dto/create-reporte.dto';
 import { UpdateReporteDto } from './dto/update-reporte.dto';
@@ -27,7 +28,7 @@ import { Role } from '../auth/roles.enum';
 
 @ApiTags('reportes')
 @ApiBearerAuth()
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RolesGuard)
 @Controller('reports')
 export class ReporteController {
   constructor(private readonly service: ReporteService) {}
