@@ -46,7 +46,7 @@ export class AuthService {
     if (!(await verifyPassword(dto.password!, user.passwordHash!, user.passwordSalt!))) {
       throw new UnauthorizedException('Password incorrecto');
     }
-    const claims = { sub: user.id!, email: user.email! };
+    const claims = { sub: user.id!, email: user.email!, role_id: Number(user.role_id!) };
     const accessToken = sign({ ...claims, type: 'access' }, ACCESS_TTL);
     const refreshToken = sign({ ...claims, type: 'refresh' }, REFRESH_TTL);
     return { accessToken, refreshToken };
@@ -58,7 +58,7 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token inválido');
     }
     const accessToken = sign(
-      { sub: payload.sub, email: payload.email, type: 'access' },
+      { sub: payload.sub, email: payload.email, role_id: payload.role_id, type: 'access' },
       ACCESS_TTL,
     );
     return { accessToken };
@@ -115,6 +115,33 @@ export class AuthService {
     }
     await this.users.delete(userId);
     return { message: 'Cuenta eliminada exitosamente' };
+  }
+
+
+  async findAllUsers() {
+    const usersList = await this.users.findAll();
+    return usersList.map((u) => ({
+      id: Number(u.id),
+      email: u.email,
+      name: u.name,
+      role: Number(u.role_id) === 1 ? 'ADMIN' : 'USER',
+    }));
+  }
+
+  async updateUserRole(userId: number, roleStr: string) {
+    const user = await this.users.findById(userId);
+    if (!user) {
+      throw new NotFoundException(`Usuario #${userId} no encontrado`);
+    }
+
+    const roleId = roleStr.toUpperCase() === 'ADMIN' ? 1 : 2;
+    await this.users.updateRole(userId, roleId);
+
+    return {
+      id: Number(user.id),
+      email: user.email,
+      role: roleId === 1 ? 'ADMIN' : 'USER',
+    };
   }
 }
 

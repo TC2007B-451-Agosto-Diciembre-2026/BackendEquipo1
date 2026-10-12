@@ -10,6 +10,13 @@ const COLUMNS =
 export class UsersRepository {
   constructor(@Inject(DB_POOL) private readonly pool: Pool) {}
 
+  async findAll(): Promise<User[]> {
+    const [rows] = await this.pool.query<RowDataPacket[]>(
+      `SELECT ${COLUMNS} FROM users WHERE deleted_at IS NULL ORDER BY user_id DESC`,
+    );
+    return rows.map(toEntity);
+  }
+
   async findByEmail(email: string): Promise<User | undefined> {
     const [rows] = await this.pool.query<RowDataPacket[]>(
       `SELECT ${COLUMNS} FROM users WHERE email = ? AND deleted_at IS NULL`,
@@ -78,6 +85,13 @@ export class UsersRepository {
     );
   }
 
+  async updateRole(id: number, roleId: number): Promise<void> {
+    await this.pool.query(
+      'UPDATE users SET role_id = ? WHERE user_id = ? AND deleted_at IS NULL',
+      [roleId, id],
+    );
+  }
+
   async delete(id: number): Promise<void> {
     await this.pool.query(
       'UPDATE users SET deleted_at = CURRENT_TIMESTAMP WHERE user_id = ?',
@@ -89,7 +103,7 @@ export class UsersRepository {
 function toEntity(row: any): User {
   const user = new User();
   user.id = row.user_id;
-  user.role = row.role_id ? String(row.role_id) : undefined;
+  user.role_id = row.role_id ? String(row.role_id) : undefined;
   user.name = row.name;
   user.email = row.email;
   user.passwordHash = row.password_hash;

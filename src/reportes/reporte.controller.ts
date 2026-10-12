@@ -22,6 +22,8 @@ import { ChangeStatusDto } from './dto/change-status.dto';
 import { CreateReporteDto } from './dto/create-reporte.dto';
 import { UpdateReporteDto } from './dto/update-reporte.dto';
 import { ReporteService } from './reporte.service';
+import { Roles } from 'src/auth/roles.decorator';
+import { Role } from '../auth/roles.enum';
 
 @ApiTags('reportes')
 @ApiBearerAuth()
@@ -31,9 +33,17 @@ export class ReporteController {
   constructor(private readonly service: ReporteService) {}
 
   @Get()
+  @Roles(Role.ADMIN, Role.USER)
   @ApiOperation({ summary: 'Listar todos los reportes activos' })
   findAll() {
     return this.service.findAll();
+  }
+
+  @Get('deleted')
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Listar los reportes en la papelera' })
+  findDeleted() {
+    return this.service.findDeleted();
   }
 
   @Get('mis-reportes')
@@ -99,6 +109,7 @@ export class ReporteController {
   }
 
   @Patch(':id/status')
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Revisar reporte (asigna admin_id, status_id, fraud_probability y approved_at)' })
   changeStatus(
     @Req() req: any,
@@ -109,10 +120,17 @@ export class ReporteController {
     return this.service.changeStatus(id, adminId, dto);
   }
 
+  @Patch(':id/restore')
+  @ApiOperation({ summary: 'Recuperar un reporte de la papelera' })
+  @Roles(Role.ADMIN)
+  restore(@Param('id', ParseIntPipe) id: number) {
+    return this.service.restore(id);
+  }
+
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar un reporte (Soft Delete)' })
   remove(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
     const userId = req.user.userId ?? req.user.id ?? req.user.sub;
-    return this.service.remove(id, userId, Number(req.user.role));
+    return this.service.remove(id, userId, Number(req.user.role_id));
   }
 }
