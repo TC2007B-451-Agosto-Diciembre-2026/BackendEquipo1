@@ -69,11 +69,6 @@ export class ReporteRepository {
       values.push(dto.description);
     }
 
-    if (dto.statusId !== undefined) {
-      fields.push('status_id = ?');
-      values.push(dto.statusId);
-    }
-
     if (fields.length === 0) {
       throw new BadRequestException('Se requiere al menos un campo para actualizar :)');
     }
