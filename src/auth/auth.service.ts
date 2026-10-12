@@ -52,13 +52,17 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  refresh(dto: RefreshDto): { accessToken: string } {
+  async refresh(dto: RefreshDto): Promise<{ accessToken: string }> {
     const payload = verify(dto.refreshToken!);
     if (!payload || payload.type !== 'refresh') {
       throw new UnauthorizedException('Refresh token inválido');
     }
+    const user = await this.users.findById(Number(payload.sub));
+    if (!user) {
+      throw new UnauthorizedException('Refresh token inválido');
+    }
     const accessToken = sign(
-      { sub: payload.sub, email: payload.email, role_id: payload.role_id, type: 'access' },
+      { sub: payload.sub, email: user.email!, role_id: Number(user.role_id), type: 'access' },
       ACCESS_TTL,
     );
     return { accessToken };
