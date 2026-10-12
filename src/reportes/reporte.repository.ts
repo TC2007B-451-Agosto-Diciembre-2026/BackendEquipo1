@@ -40,7 +40,6 @@ export class ReporteRepository {
    VALUES (?, ?, 1, ?, ?, ?)`,
       [userId, dto.categoryId, dto.caseType, dto.title, dto.description],
     );
-    // La URL de evidencia va en la tabla evidence (par tipo + contenido), no en reports.
     if (dto.evidenceUrl) {
       await this.addEvidence(result.insertId, 'url', dto.evidenceUrl);
     }
