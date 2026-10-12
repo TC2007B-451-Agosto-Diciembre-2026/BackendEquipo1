@@ -94,7 +94,9 @@ export class UsersRepository {
 
   async delete(id: number): Promise<void> {
     await this.pool.query(
-      'UPDATE users SET deleted_at = CURRENT_TIMESTAMP WHERE user_id = ?',
+      `UPDATE users
+       SET deleted_at = CURRENT_TIMESTAMP, email = CONCAT('deleted+', user_id, '@sentinel.invalid'), phone = NULL
+       WHERE user_id = ? AND deleted_at IS NULL`,
       [id],
     );
   }
