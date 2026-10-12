@@ -8,7 +8,7 @@ export class StatsRepository {
 
     async getSummary() {
         const [rows] = await this.pool.query<RowDataPacket[]>(`SELECT 
-        COUNT(*) AS totalReports,
+        SUM(CASE WHEN deleted_at IS NULL THEN 1 ELSE 0 END) AS totalReports,
         SUM(CASE WHEN status_id = 1 AND deleted_at IS NULL THEN 1 ELSE 0 END) AS pendingReports,
         SUM(CASE WHEN status_id = 2 AND deleted_at IS NULL THEN 1 ELSE 0 END) AS approvedReports,
         SUM(CASE WHEN status_id = 3 AND deleted_at IS NULL THEN 1 ELSE 0 END) AS rejectedReports

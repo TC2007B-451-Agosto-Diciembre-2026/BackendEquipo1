@@ -5,6 +5,7 @@ import {
   Param,
   Body,
   ParseIntPipe,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -20,6 +21,7 @@ import { AuthGuard } from './auth.guard';
 import { RolesGuard } from './roles.guard';
 import { Roles } from './roles.decorator';
 import { Role } from './roles.enum';
+import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -91,9 +93,10 @@ export class UsersController {
     description: 'Usuario no encontrado',
   })
   updateRole(
+    @Req() req: any,
     @Param('id', ParseIntPipe) id: number,
-    @Body('role') role: string,
+    @Body() dto: UpdateUserRoleDto,
   ) {
-    return this.authService.updateUserRole(id, role);
+    return this.authService.updateUserRole(id, dto.role, Number(req.user.sub));
   }
 }

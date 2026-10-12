@@ -41,10 +41,11 @@ export class AuthService {
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const user = await this.users.findByEmail(dto.email!);
     if (!user) {
-      throw new UnauthorizedException('El usuario no existe');
+      await scryptAsync(dto.password!, DUMMY_SALT, HASH_BYTES);
+      throw new UnauthorizedException('Credenciales inválidas');
     }
     if (!(await verifyPassword(dto.password!, user.passwordHash!, user.passwordSalt!))) {
-      throw new UnauthorizedException('Password incorrecto');
+      throw new UnauthorizedException('Credenciales inválidas');
     }
     const claims = { sub: user.id!, email: user.email!, role_id: Number(user.role_id!) };
     const accessToken = sign({ ...claims, type: 'access' }, ACCESS_TTL);
@@ -52,13 +53,17 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  refresh(dto: RefreshDto): { accessToken: string } {
+  async refresh(dto: RefreshDto): Promise<{ accessToken: string }> {
     const payload = verify(dto.refreshToken!);
     if (!payload || payload.type !== 'refresh') {
       throw new UnauthorizedException('Refresh token inválido');
     }
+    const user = await this.users.findById(Number(payload.sub));
+    if (!user) {
+      throw new UnauthorizedException('Refresh token inválido');
+    }
     const accessToken = sign(
-      { sub: payload.sub, email: payload.email, role_id: payload.role_id, type: 'access' },
+      { sub: payload.sub, email: user.email!, role_id: Number(user.role_id), type: 'access' },
       ACCESS_TTL,
     );
     return { accessToken };
@@ -84,6 +89,7 @@ export class AuthService {
       passwordHash?: string;
       passwordSalt?: string;
       name?: string;
+      phone?: string;
     } = {};
 
     if (dto.email) {
@@ -99,6 +105,7 @@ export class AuthService {
     }
 
     if (dto.name) updateData.name = dto.name;
+    if (dto.phone) updateData.phone = dto.phone;
 
     if (Object.keys(updateData).length === 0) {
       throw new BadRequestException('No se proporcionaron datos para actualizar');
@@ -128,7 +135,10 @@ export class AuthService {
     }));
   }
 
-  async updateUserRole(userId: number, roleStr: string) {
+  async updateUserRole(userId: number, roleStr: string, currentUserId: number) {
+    if (userId === currentUserId) {
+      throw new BadRequestException('No puedes cambiar tu propio rol');
+    }
     const user = await this.users.findById(userId);
     if (!user) {
       throw new NotFoundException(`Usuario #${userId} no encontrado`);
@@ -145,15 +155,14 @@ export class AuthService {
   }
 }
 
-// scrypt con una sal aleatoria por usuario. La sal se guarda en su propia
-// columna (password_salt) y el hash en password_hash, ambos en hex.
 const scryptAsync = promisify(scrypt) as (
   password: string,
   salt: string,
   keylen: number,
 ) => Promise<Buffer>;
-const SALT_BYTES = 16; // 32 caracteres hex -> CHAR(32)
-const HASH_BYTES = 64; // 128 caracteres hex -> CHAR(128)
+const SALT_BYTES = 16;
+const HASH_BYTES = 64;
+const DUMMY_SALT = randomBytes(SALT_BYTES).toString('hex');
 
 async function hashPassword(
   password: string,
