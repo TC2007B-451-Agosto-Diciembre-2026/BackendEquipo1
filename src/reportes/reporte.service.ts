@@ -61,7 +61,14 @@ export class ReporteService {
   }
 
   async create(userId: number, dto: CreateReporteDto) {
+    await this.assertCategoryExists(dto.categoryId);
     return this.repository.save(userId, dto);
+  }
+
+  private async assertCategoryExists(categoryId: number) {
+    if (!(await this.repository.categoryExists(categoryId))) {
+      throw new BadRequestException(`La categoría ${categoryId} no existe`);
+    }
   }
 
   async uploadImage(id: number, userId: number, file: Express.Multer.File) {
@@ -144,6 +151,9 @@ export class ReporteService {
     ) {
       throw new BadRequestException('Se requiere al menos un campo para actualizar');
     }
+    if (dto.categoryId !== undefined) {
+      await this.assertCategoryExists(dto.categoryId);
+    }
 
     await this.repository.update(id, dto);
     return { message: 'Reporte actualizado con éxito' };
@@ -151,6 +161,9 @@ export class ReporteService {
 
   async changeStatus(id: number, adminId: number, dto: ChangeStatusDto) {
     await this.findOne(id);
+    if (!(await this.repository.statusExists(dto.statusId))) {
+      throw new BadRequestException(`El estado ${dto.statusId} no existe`);
+    }
     await this.repository.updateStatus(
       id,
       adminId,

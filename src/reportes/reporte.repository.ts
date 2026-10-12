@@ -116,12 +116,30 @@ export class ReporteRepository {
     statusId: number,
     fraudProbability?: number,
   ): Promise<void> {
+    const pending = statusId === 1;
     await this.pool.query(
-      `UPDATE reports 
-       SET status_id = ?, admin_id = ?, fraud_probability = ?, approved_at = NOW() 
+      `UPDATE reports
+       SET status_id = ?, admin_id = ?, fraud_probability = COALESCE(?, fraud_probability),
+           approved_at = ${pending ? 'NULL' : 'NOW()'}
        WHERE report_id = ? AND deleted_at IS NULL`,
-      [statusId, adminId, fraudProbability ?? null, id],
+      [statusId, pending ? null : adminId, fraudProbability ?? null, id],
     );
+  }
+
+  async statusExists(id: number): Promise<boolean> {
+    const [rows] = await this.pool.query<RowDataPacket[]>(
+      'SELECT 1 FROM validation_statuses WHERE status_id = ?',
+      [id],
+    );
+    return rows.length > 0;
+  }
+
+  async categoryExists(id: number): Promise<boolean> {
+    const [rows] = await this.pool.query<RowDataPacket[]>(
+      'SELECT 1 FROM categories WHERE category_id = ?',
+      [id],
+    );
+    return rows.length > 0;
   }
 
   async softDelete(id: number): Promise<void> {
