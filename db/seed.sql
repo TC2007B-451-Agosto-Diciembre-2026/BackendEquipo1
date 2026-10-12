@@ -62,15 +62,15 @@ INSERT INTO reports (report_id, user_id, admin_id, category_id, status_id, case_
 INSERT INTO evidence (evidence_id, report_id, evidence_type, content, created_at) VALUES
 (1, 1, 'text',  'SEMOVI: Tiene una fotocivica pendiente por $1,245. Pague HOY con 30% de descuento y evite recargos: http://semovi-pagos.example/fotocivica?folio=88213', '2026-08-12 10:14:00'),
 (2, 1, 'url',   'http://semovi-pagos.example/fotocivica?folio=88213', '2026-08-12 10:14:00'),
-(3, 1, 'image', 'http://storage:9000/evidence/reports/1/captura-sms.jpg', '2026-08-12 10:15:00'),
+(3, 1, 'image', 'reports/1/3b7f2c9e-1a4d-4e8b-9c51-0f6d2a8e7b13.jpg', '2026-08-12 10:15:00'),
 (4, 2, 'url',   'https://acortador.example/mUlt4cdmx', '2026-09-03 21:47:00'),
-(5, 2, 'image', 'http://storage:9000/evidence/reports/2/correo-multa.png', '2026-09-03 21:48:00'),
+(5, 2, 'image', 'reports/2/c4d82e1f-7b3a-4f60-9e25-6a1b8c0d3f97.png', '2026-09-03 21:48:00'),
 (6, 3, 'phone', '5500000201', '2026-08-20 13:05:00'),
 (7, 3, 'text',  'Buenas tardes, soy oficial de tránsito. Su vehículo tiene una infracción; deposite $2,800 a la cuenta que le envío para evitar el corralón.', '2026-08-20 13:05:00'),
-(8, 3, 'image', 'http://storage:9000/evidence/reports/3/comprobante-deposito.jpg', '2026-08-20 13:06:00'),
+(8, 3, 'image', 'reports/3/5a9e3d21-c84b-47f1-b0d6-9e2c7a4f8165.jpg', '2026-08-20 13:06:00'),
 (9, 4, 'url',   'https://www.semovi.cdmx.gob.mx', '2026-09-10 09:20:00'),
 (10, 5, 'phone', '5500000202', '2026-09-22 19:33:00'),
 (11, 6, 'url',   'http://fotocivicas-descuento.example/pago', '2026-09-28 11:10:00'),
-(12, 6, 'image', 'http://storage:9000/evidence/reports/6/anuncio-descuento.png', '2026-09-28 11:11:00'),
+(12, 6, 'image', 'reports/6/f2a6b9c4-3e1d-4b7a-8d50-c7e4f1a9b2d6.png', '2026-09-28 11:11:00'),
 (13, 7, 'text',  'Cargo en tarjeta: "PAGO MULTA TRANSITO" por $1,500 el 30/09/2026.', '2026-10-01 08:55:00'),
-(14, 9, 'image', 'http://storage:9000/evidence/reports/9/captura-sms.jpg', '2026-08-12 10:20:00');
+(14, 9, 'image', 'reports/9/8e1c4a7b-5d2f-4c9e-a613-2b9f0d7e4c58.jpg', '2026-08-12 10:20:00');
