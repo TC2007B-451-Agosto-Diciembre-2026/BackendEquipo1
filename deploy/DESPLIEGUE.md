@@ -12,6 +12,7 @@ Direcciones que usa cada cliente:
 
 - Panel web: `http://172.16.64.2/`
 - API (panel y app iOS): `http://172.16.64.2/api`
+- Documentación de la API (Swagger): `http://172.16.64.2/api/docs`. Se puede apagar con `SWAGGER=0` en `deploy/app/.env`.
 
 ## 1. En las dos PCs
 
@@ -112,6 +113,7 @@ Docker Desktop no conserva la IP real del cliente: el backend ve a todos los dis
 | 2 | PC Back/Front | `docker compose logs backend` | `Conectando a mysql://***@172.16.64.10:3306/sentinel` y `Nest application successfully started` |
 | 3 | Mac | `curl http://172.16.64.2/api/public/reports` | JSON con los reportes aprobados |
 | 4 | Mac (navegador) | `http://172.16.64.2/` e iniciar sesión con `laura.mendez@sentinel.test` | Panel con la lista de reportes |
+| 4b | Mac (navegador) | `http://172.16.64.2/api/docs` | Swagger con el servidor `/api`; "Try it out" en `/public/categories` responde 200 |
 | 5 | Panel | Cambiar el estado de un reporte | Se guarda y aparece al recargar |
 | 6 | Simulador | Abrir la app sin sesión | Reportes verificados y estadísticas |
 | 7 | Simulador | Registrarse, crear un reporte con foto y ver "Mis reportes" | El reporte aparece pendiente y con la foto |
