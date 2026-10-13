@@ -18,10 +18,11 @@ async function bootstrap() {
     .setTitle('API Sistema de Reportes y Roles')
     .setDescription('API REST para la gestión de usuarios, roles y reportes.')
     .setVersion('1.0')
+    .addServer(process.env.SWAGGER_SERVER_URL ?? '/')
     .addBearerAuth()
     .build();
 
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== 'production' || process.env.SWAGGER === '1') {
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('docs', app, document);
   }
