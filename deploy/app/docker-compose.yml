@@ -2,21 +2,20 @@ name: sentinel-app
 
 services:
   proxy:
-    image: nginx:1.27-alpine
+    image: miguelgarduno123/sentinel-proxy:${SENTINEL_TAG:-1.0}
     restart: unless-stopped
     ports:
       - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - backend
       - admin-web
 
   backend:
-    build: ../..
+    image: miguelgarduno123/sentinel-backend:${SENTINEL_TAG:-1.0}
     restart: unless-stopped
-    env_file: .env
     environment:
+      DATABASE_URL: ${DATABASE_URL:?Falta DATABASE_URL en .env}
+      JWT_SECRET: ${JWT_SECRET:?Falta JWT_SECRET en .env}
       NODE_ENV: production
       PORT: "3000"
       TRUST_PROXY: "1"
@@ -28,10 +27,7 @@ services:
       - evidence_data:/app/uploads
 
   admin-web:
-    build:
-      context: ${FRONTEND_PATH:-../../../FrontendEquipo1}
-      args:
-        NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-http://172.16.64.2/api}
+    image: miguelgarduno123/sentinel-admin-web:${SENTINEL_TAG:-1.0}
     restart: unless-stopped
 
 volumes:
