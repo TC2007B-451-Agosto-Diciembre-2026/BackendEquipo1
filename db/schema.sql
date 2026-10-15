@@ -80,6 +80,7 @@ INSERT INTO validation_statuses (status_id, name) VALUES
 (3, 'rechazado');
 
 INSERT INTO categories (category_id, name) VALUES
-(1, 'Multa de tránsito falsa'),
-(2, 'Fotocívica falsa'),
-(3, 'Otro');
+(1, 'Circulación y Seguridad'),
+(2, 'Estacionamiento'),
+(3, 'Administrativa'),
+(4, 'Estado del vehículo');
