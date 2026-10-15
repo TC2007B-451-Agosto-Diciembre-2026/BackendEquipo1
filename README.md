@@ -49,6 +49,7 @@ Si la API corre detrás de nginx, pongan `TRUST_PROXY=1` en `.env` para que el l
 Puedes acceder a la documentación interactiva OpenAPI y probar los endpoints desde el navegador en:
 * **Swagger UI:** [http://localhost:3000/docs](http://localhost:3000/docs)
 * **OpenAPI JSON:** [http://localhost:3000/docs-json](http://localhost:3000/docs-json)
+* **Especificación en el repositorio:** [docs/openapi.json](docs/openapi.json), disponible aunque el servidor esté apagado
 
 ## Principales Endpoints
 

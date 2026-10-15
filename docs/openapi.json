@@ -1,0 +1,1627 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/roles": {
+      "get": {
+        "operationId": "RolesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de roles obtenida"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener todos los roles",
+        "tags": [
+          "roles"
+        ]
+      },
+      "post": {
+        "operationId": "RolesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Rol creado con exito"
+          },
+          "400": {
+            "description": "Datos de entrada inválidos"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear un nuevo rol",
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/roles/{id}": {
+      "get": {
+        "operationId": "RolesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rol encontrado"
+          },
+          "404": {
+            "description": "Rol no encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener rol por Id",
+        "tags": [
+          "roles"
+        ]
+      },
+      "patch": {
+        "operationId": "RolesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Actualizar un rol existente",
+        "tags": [
+          "roles"
+        ]
+      },
+      "delete": {
+        "operationId": "RolesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Eliminar un rol",
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/categories": {
+      "post": {
+        "operationId": "CategoriesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear una nueva categoría",
+        "tags": [
+          "categories"
+        ]
+      },
+      "get": {
+        "operationId": "CategoriesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar todas las categorías",
+        "tags": [
+          "categories"
+        ]
+      }
+    },
+    "/categories/{id}": {
+      "get": {
+        "operationId": "CategoriesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Buscar una categoria en específico",
+        "tags": [
+          "categories"
+        ]
+      },
+      "patch": {
+        "operationId": "CategoriesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Actualizar una categoría existente",
+        "tags": [
+          "categories"
+        ]
+      },
+      "delete": {
+        "operationId": "CategoriesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Eliminar una categoría",
+        "tags": [
+          "categories"
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "operationId": "AuthController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuario registrado exitosamente"
+          },
+          "409": {
+            "description": "El email ya está registrado"
+          }
+        },
+        "summary": "Registrar un nuevo usuario",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Inicio de sesión exitoso"
+          },
+          "401": {
+            "description": "Credenciales inválidas"
+          },
+          "429": {
+            "description": "Demasiados intentos"
+          }
+        },
+        "summary": "Iniciar sesión y obtener tokens",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token renovado exitosamente"
+          },
+          "401": {
+            "description": "Refresh token inválido"
+          }
+        },
+        "summary": "Renovar el access token de sesión",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "AuthController_getProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Perfil obtenido correctamente"
+          },
+          "401": {
+            "description": "No autorizado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener el perfil del usuario autenticado",
+        "tags": [
+          "auth"
+        ]
+      },
+      "patch": {
+        "operationId": "AuthController_updateProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Perfil actualizado exitosamente"
+          },
+          "401": {
+            "description": "No autorizado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Actualizar la información de la cuenta propia",
+        "tags": [
+          "auth"
+        ]
+      },
+      "delete": {
+        "operationId": "AuthController_deleteAccount",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Cuenta eliminada exitosamente"
+          },
+          "401": {
+            "description": "No autorizado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Eliminar la cuenta propia (Soft delete)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/users": {
+      "get": {
+        "operationId": "UsersController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de usuarios obtenida exitosamente"
+          },
+          "401": {
+            "description": "No autorizado — Token de acceso faltante o inválido"
+          },
+          "403": {
+            "description": "Prohibido — Se requieren permisos de Administrador"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener la lista completa de usuarios registrados",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/{id}/role": {
+      "patch": {
+        "operationId": "UsersController_updateRole",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID único del usuario al que se le actualizará el rol",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "ADMIN",
+                      "USER"
+                    ],
+                    "example": "ADMIN",
+                    "description": "Nuevo rol que se asignará al usuario"
+                  }
+                },
+                "required": [
+                  "role"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rol del usuario actualizado exitosamente"
+          },
+          "400": {
+            "description": "Solicitud incorrecta — Datos del rol inválidos"
+          },
+          "401": {
+            "description": "No autorizado — Token de acceso faltante o inválido"
+          },
+          "403": {
+            "description": "Prohibido — Se requieren permisos de Administrador"
+          },
+          "404": {
+            "description": "Usuario no encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Actualizar el rol de un usuario por su ID",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/reports": {
+      "get": {
+        "operationId": "ReporteController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar todos los reportes activos",
+        "tags": [
+          "reportes"
+        ]
+      },
+      "post": {
+        "operationId": "ReporteController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReporteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear un nuevo reporte (status_id por defecto: 1)",
+        "tags": [
+          "reportes"
+        ]
+      }
+    },
+    "/reports/deleted": {
+      "get": {
+        "operationId": "ReporteController_findDeleted",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar los reportes en la papelera",
+        "tags": [
+          "reportes"
+        ]
+      }
+    },
+    "/reports/mis-reportes": {
+      "get": {
+        "operationId": "ReporteController_findMyReports",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener los reportes creados por el usuario",
+        "tags": [
+          "reportes"
+        ]
+      }
+    },
+    "/reports/{id}": {
+      "get": {
+        "operationId": "ReporteController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener detalle de un reporte en especifico",
+        "tags": [
+          "reportes"
+        ]
+      },
+      "patch": {
+        "operationId": "ReporteController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReporteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Actualizar contenido de un reporte propio",
+        "tags": [
+          "reportes"
+        ]
+      },
+      "delete": {
+        "operationId": "ReporteController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Eliminar un reporte (Soft Delete)",
+        "tags": [
+          "reportes"
+        ]
+      }
+    },
+    "/reports/{id}/image": {
+      "post": {
+        "operationId": "ReporteController_uploadImage",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "image"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Adjuntar una imagen de evidencia (JPG o PNG, máx. 5 MB) a un reporte propio",
+        "tags": [
+          "reportes"
+        ]
+      }
+    },
+    "/reports/{id}/evidence": {
+      "get": {
+        "operationId": "ReporteController_findEvidence",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar las evidencias de un reporte propio (admin: cualquiera)",
+        "tags": [
+          "reportes"
+        ]
+      }
+    },
+    "/reports/{id}/status": {
+      "patch": {
+        "operationId": "ReporteController_changeStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Revisar reporte (asigna admin_id, status_id, fraud_probability y approved_at)",
+        "tags": [
+          "reportes"
+        ]
+      }
+    },
+    "/reports/{id}/restore": {
+      "patch": {
+        "operationId": "ReporteController_restore",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Recuperar un reporte de la papelera",
+        "tags": [
+          "reportes"
+        ]
+      }
+    },
+    "/evidence/{id}": {
+      "get": {
+        "operationId": "EvidenceController_download",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "exp",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sig",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Descargar una imagen de evidencia con una URL firmada",
+        "tags": [
+          "reportes"
+        ]
+      }
+    },
+    "/public/reports": {
+      "get": {
+        "operationId": "PublicController_findReports",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Reportes aprobados, sin iniciar sesión y sin datos del autor",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/public/reports/{id}": {
+      "get": {
+        "operationId": "PublicController_findReport",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Detalle de un reporte aprobado, sin iniciar sesión",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/public/categories": {
+      "get": {
+        "operationId": "PublicController_findCategories",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Categorías, sin iniciar sesión",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/public/stats/summary": {
+      "get": {
+        "operationId": "PublicController_getSummary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Resumen de estadísticas, sin iniciar sesión",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/public/stats/by-category": {
+      "get": {
+        "operationId": "PublicController_getByCategory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Reportes por categoría, sin iniciar sesión",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/stats/summary": {
+      "get": {
+        "operationId": "StatsController_getSummary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Resumen global de totales y estados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SummaryStatsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener métricas globales de reportes",
+        "tags": [
+          "stats"
+        ]
+      }
+    },
+    "/stats/by-category": {
+      "get": {
+        "operationId": "StatsController_getByCategory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Conteo de reportes desglosado por categoría",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryStatsDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener distribución de reportes por categoría",
+        "tags": [
+          "stats"
+        ]
+      }
+    },
+    "/stats/by-status": {
+      "get": {
+        "operationId": "StatsController_getByStatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Conteo de reportes desglosado por estado de validación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StatusStatsDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener distribución de reportes por estado de validación",
+        "tags": [
+          "stats"
+        ]
+      }
+    },
+    "/stats/monthly": {
+      "get": {
+        "operationId": "StatsController_getMonthly",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Histórico de reportes agrupados por mes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MonthlyStatsDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener tendencia mensual de reportes registrados",
+        "tags": [
+          "stats"
+        ]
+      }
+    },
+    "/validation-statuses": {
+      "get": {
+        "operationId": "ValidationStatusesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar todos los estados de validación",
+        "tags": [
+          "validation-statuses"
+        ]
+      },
+      "post": {
+        "operationId": "ValidationStatusesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateValidationStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear un nuevo estado de validación",
+        "tags": [
+          "validation-statuses"
+        ]
+      }
+    },
+    "/validation-statuses/{id}": {
+      "get": {
+        "operationId": "ValidationStatusesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener un estado de validación por ID",
+        "tags": [
+          "validation-statuses"
+        ]
+      },
+      "patch": {
+        "operationId": "ValidationStatusesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateValidationStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Actualizar un estado de validación",
+        "tags": [
+          "validation-statuses"
+        ]
+      },
+      "delete": {
+        "operationId": "ValidationStatusesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Eliminar un estado de validación",
+        "tags": [
+          "validation-statuses"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "API Sistema de Reportes y Roles",
+    "description": "API REST para la gestión de usuarios, roles y reportes.",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [
+    {
+      "url": "http://172.16.64.2/api",
+      "description": "Laboratorio de redes (nginx)"
+    },
+    {
+      "url": "http://localhost:3000",
+      "description": "Local (npm run start:dev)"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "CreateRoleDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nombre de rol",
+            "example": "Administrador"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateRoleDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nombre de rol",
+            "example": "Administrador"
+          }
+        }
+      },
+      "CreateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Circulación y seguridad",
+            "description": "Nombre de la categoría"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Circulación y seguridad",
+            "description": "Nombre de la categoría"
+          }
+        }
+      },
+      "RegisterDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "juan@example.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "secreto123",
+            "minLength": 6
+          },
+          "name": {
+            "type": "string",
+            "example": "Juan Pérez"
+          },
+          "phone": {
+            "type": "string",
+            "example": "5512345678",
+            "description": "Teléfono (opcional)"
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "name"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "atl@example.com",
+            "description": "Correo electrónico registrado en la plataforma"
+          },
+          "password": {
+            "type": "string",
+            "example": "secreto1234",
+            "description": "Contraseña de la cuenta"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "RefreshDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateProfileDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Tu Nombre"
+          },
+          "email": {
+            "type": "string",
+            "example": "nuevo_email@example.com"
+          },
+          "phone": {
+            "type": "string",
+            "example": "5512345678"
+          },
+          "password": {
+            "type": "string",
+            "example": "nuevaClave123",
+            "minLength": 6
+          }
+        }
+      },
+      "CreateReporteDto": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "number",
+            "example": 1,
+            "description": "ID de la categoría del reporte"
+          },
+          "caseType": {
+            "type": "string",
+            "example": "report",
+            "enum": [
+              "señalamiento",
+              "report"
+            ],
+            "description": "Tipo de caso"
+          },
+          "title": {
+            "type": "string",
+            "example": "Sitio clonado de banco",
+            "description": "Título del reporte (máx. 150 caracteres)"
+          },
+          "evidenceUrl": {
+            "type": "string",
+            "example": "https://banco-falso-login.com"
+          },
+          "description": {
+            "type": "string",
+            "example": "Se identificó un dominio malicioso que suplanta la identidad bancaria.",
+            "description": "Descripción detallada"
+          }
+        },
+        "required": [
+          "categoryId",
+          "caseType",
+          "title",
+          "evidenceUrl",
+          "description"
+        ]
+      },
+      "UpdateReporteDto": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "number",
+            "example": 1,
+            "description": "ID de la categoría del reporte"
+          },
+          "caseType": {
+            "type": "string",
+            "example": "report",
+            "enum": [
+              "señalamiento",
+              "report"
+            ],
+            "description": "Tipo de caso"
+          },
+          "title": {
+            "type": "string",
+            "example": "Sitio clonado de banco",
+            "description": "Título del reporte (máx. 150 caracteres)"
+          },
+          "description": {
+            "type": "string",
+            "example": "Se identificó un dominio malicioso que suplanta la identidad bancaria.",
+            "description": "Descripción detallada"
+          }
+        }
+      },
+      "ChangeStatusDto": {
+        "type": "object",
+        "properties": {
+          "statusId": {
+            "type": "number",
+            "example": 2,
+            "description": "ID del estado de validación"
+          },
+          "fraudProbability": {
+            "type": "number",
+            "example": 85.5,
+            "description": "Probabilidad de fraude (0.00 a 100.00)"
+          }
+        },
+        "required": [
+          "statusId"
+        ]
+      },
+      "SummaryStatsDto": {
+        "type": "object",
+        "properties": {
+          "totalReports": {
+            "type": "number",
+            "example": 120,
+            "description": "Total histórico de reportes creados"
+          },
+          "pendingReports": {
+            "type": "number",
+            "example": 15,
+            "description": "Reportes pendientes de revisión"
+          },
+          "approvedReports": {
+            "type": "number",
+            "example": 85,
+            "description": "Reportes aprobados / validados"
+          },
+          "rejectedReports": {
+            "type": "number",
+            "example": 20,
+            "description": "Reportes rechazados o desestimados"
+          }
+        },
+        "required": [
+          "totalReports",
+          "pendingReports",
+          "approvedReports",
+          "rejectedReports"
+        ]
+      },
+      "CategoryStatsDto": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "number",
+            "example": 1,
+            "description": "ID de la categoría"
+          },
+          "categoryName": {
+            "type": "string",
+            "example": "Circulación y seguridad",
+            "description": "Nombre de la categoría"
+          },
+          "total": {
+            "type": "number",
+            "example": 45,
+            "description": "Total de reportes en esta categoría"
+          }
+        },
+        "required": [
+          "categoryId",
+          "categoryName",
+          "total"
+        ]
+      },
+      "StatusStatsDto": {
+        "type": "object",
+        "properties": {
+          "statusId": {
+            "type": "number",
+            "example": 1,
+            "description": "ID del estado"
+          },
+          "statusName": {
+            "type": "string",
+            "example": "En revisión",
+            "description": "Nombre del estado"
+          },
+          "total": {
+            "type": "number",
+            "example": 15,
+            "description": "Total de reportes con este estado"
+          }
+        },
+        "required": [
+          "statusId",
+          "statusName",
+          "total"
+        ]
+      },
+      "MonthlyStatsDto": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "example": "2026-09",
+            "description": "Año y mes (YYYY-MM)"
+          },
+          "total": {
+            "type": "number",
+            "example": 32,
+            "description": "Total de reportes creados en dicho mes"
+          }
+        },
+        "required": [
+          "month",
+          "total"
+        ]
+      },
+      "CreateValidationStatusDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "En investigación",
+            "description": "Nombre del estado de validación"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateValidationStatusDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "En investigación",
+            "description": "Nombre del estado de validación"
+          }
+        }
+      }
+    }
+  }
+}
