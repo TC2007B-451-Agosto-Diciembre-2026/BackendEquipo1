@@ -19,44 +19,30 @@ import { Role } from '../auth/roles.enum';
 @Injectable()
 export class ReporteService {
   constructor(private readonly repository: ReporteRepository) {}
-  
-  private async addImageUrl(report: Report) {
-    const evidence = await this.repository.findEvidence(report.id);
-    const image = evidence.find(
-      (item) =>
-        item.evidence_type === 'image' &&
-        storedImage(item.content) !== null,
-    );
-    return {
-      ...report,
-      imageUrl: image
-        ? signedEvidenceUrl(Number(image.evidence_id))
-        : null,
-    };
-}
+
   async findAll(roleId: number) {
-    const reports = await this.repository.findAll();
     if (roleId === Role.ADMIN) {
-      return Promise.all(
-        reports.map((report) => this.addImageUrl(report)),
-      );
+      const reports = await this.repository.findAll();
+      return Promise.all(reports.map((report) => this.addImageUrl(report)));
     }
-    return Promise.all(
-      reports.map(async (report) => {
-        const reportWithImage = await this.addImageUrl(report);
-        return toPublic(reportWithImage);
-      }),
-    );
+    return this.findPublic();
   }
 
   async findPublic() {
-    const reports = await this.repository.findAll();
-    return Promise.all(
-      reports.map(async (report) => {
-        const reportWithImage = await this.addImageUrl(report);
-        return toPublic(reportWithImage);
-      }),
+    const reports = await this.repository.findApproved();
+    const withImages = await Promise.all(reports.map((report) => this.addImageUrl(report)));
+    return withImages.map(toPublic);
+  }
+
+  private async addImageUrl<T extends Report>(report: T) {
+    const evidence = await this.repository.findEvidence(report.id);
+    const image = evidence.find(
+      (item) => item.evidence_type === 'image' && storedImage(item.content) !== null,
     );
+    return {
+      ...report,
+      imageUrl: image ? signedEvidenceUrl(Number(image.evidence_id)) : null,
+    };
   }
 
   async findPublicOne(id: number) {
