@@ -22,6 +22,10 @@ npm run start:dev
 
 La aplicación estará disponible en `http://localhost:3000`.
 
+## Despliegue en el laboratorio
+
+Ver [deploy/DESPLIEGUE.md](deploy/DESPLIEGUE.md): una PC con la base de datos y otra con nginx, backend y panel web, todo con Docker.
+
 ## Base de datos y datos de prueba
 
 ```bash
