@@ -45,4 +45,10 @@ export class PublicController {
   getByCategory() {
     return this.stats.getByCategory();
   }
+
+  @Get('stats/monthly')
+  @ApiOperation({ summary: 'Reportes por mes, sin iniciar sesión' })
+  getMonthlyStats() {
+    return this.stats.getMonthly();
+  }
 }

@@ -19,18 +19,44 @@ import { Role } from '../auth/roles.enum';
 @Injectable()
 export class ReporteService {
   constructor(private readonly repository: ReporteRepository) {}
-
+  
+  private async addImageUrl(report: Report) {
+    const evidence = await this.repository.findEvidence(report.id);
+    const image = evidence.find(
+      (item) =>
+        item.evidence_type === 'image' &&
+        storedImage(item.content) !== null,
+    );
+    return {
+      ...report,
+      imageUrl: image
+        ? signedEvidenceUrl(Number(image.evidence_id))
+        : null,
+    };
+}
   async findAll(roleId: number) {
+    const reports = await this.repository.findAll();
     if (roleId === Role.ADMIN) {
-      return this.repository.findAll();
+      return Promise.all(
+        reports.map((report) => this.addImageUrl(report)),
+      );
     }
-    const reports = await this.repository.findApproved();
-    return reports.map(toPublic);
+    return Promise.all(
+      reports.map(async (report) => {
+        const reportWithImage = await this.addImageUrl(report);
+        return toPublic(reportWithImage);
+      }),
+    );
   }
 
   async findPublic() {
-    const reports = await this.repository.findApproved();
-    return reports.map(toPublic);
+    const reports = await this.repository.findAll();
+    return Promise.all(
+      reports.map(async (report) => {
+        const reportWithImage = await this.addImageUrl(report);
+        return toPublic(reportWithImage);
+      }),
+    );
   }
 
   async findPublicOne(id: number) {
@@ -62,7 +88,10 @@ export class ReporteService {
   }
 
   async findMyReports(userId: number) {
-    return this.repository.findByUserId(userId);
+    const reports = await this.repository.findByUserId(userId);
+    return Promise.all(
+      reports.map((report) => this.addImageUrl(report)),
+    );
   }
 
   async findOne(id: number) {
