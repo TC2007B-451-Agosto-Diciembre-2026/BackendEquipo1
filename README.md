@@ -2,32 +2,91 @@
 
 API REST construida con NestJS y MySQL para la gestión centralizada de usuarios, asignación de roles y seguimiento de reportes con estados de validación.
 
-## Requisitos
+## Correr en local desde cero
 
-- Node.js 20 o superior
-- MySQL 8.0+ corriendo localmente (puerto `3306`)
+Orden para levantar todo en tu computadora: 1) base de datos, 2) este backend, 3) el panel web ([FrontendEquipo1](https://github.com/TC2007B-451-Agosto-Diciembre-2026/FrontendEquipo1)) y 4) la app de iOS ([Sentinel](https://github.com/sentinelTec/Sentinel)). Cada repo explica su parte en su README.
 
-## Instalación y Ejecución
+### Requisitos
+
+- Git
+- Node.js 20 o superior (`node -v` para revisar)
+- MySQL 8 corriendo en el puerto `3306`
+  - Mac: `brew install mysql` y luego `brew services start mysql`
+  - Windows: instalar MySQL Server 8 con el MySQL Installer
+
+### 1. Clonar el repo
 
 ```bash
-# 1. Instalar dependencias
-npm install
-
-# 2. Crear .env a partir del ejemplo y llenar JWT_SECRET y DATABASE_URL
-cp .env.example .env
-
-# 3. Iniciar servidor en modo desarrollo
-npm run start:dev
+git clone https://github.com/TC2007B-451-Agosto-Diciembre-2026/BackendEquipo1.git
+cd BackendEquipo1
 ```
 
-La aplicación estará disponible en `http://localhost:3000`.
-
-## Base de datos y datos de prueba
+### 2. Crear la base de datos
 
 ```bash
 mysql -u root -p < db/schema.sql
 mysql -u root -p < db/seed.sql
 ```
+
+Si sale `Table 'roles' already exists`, ya tienes una base `sentinel` de antes. Bórrala y vuelve a correr los dos comandos (esto borra todos sus datos):
+
+```bash
+mysql -u root -p -e "DROP DATABASE sentinel"
+```
+
+### 3. Copiar las fotos de ejemplo
+
+Las imágenes de los reportes de ejemplo se sirven desde la carpeta `uploads`:
+
+```bash
+cp -R db/seed-evidence uploads
+```
+
+En Windows (cmd): `xcopy db\seed-evidence uploads\ /E /I`
+
+### 4. Crear el archivo `.env`
+
+```bash
+cp .env.example .env
+```
+
+Abre `.env` y cambia estas dos líneas:
+
+```env
+DATABASE_URL=mysql://root:TU_CONTRASEÑA@localhost:3306/sentinel
+JWT_SECRET=una-cadena-larga-y-aleatoria
+```
+
+- En `DATABASE_URL` pon tu usuario y contraseña de MySQL. El host debe ser `localhost` (el `db` del ejemplo solo sirve dentro de Docker). Si la contraseña tiene caracteres especiales, escríbelos codificados (`#` → `%23`, `@` → `%40`).
+- Para generar un `JWT_SECRET`: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+- Lo demás se queda como está.
+
+### 5. Instalar y arrancar
+
+```bash
+npm install
+npm run start:dev
+```
+
+Cuando termine de arrancar imprime `API en http://localhost:3000 y en http://<tu IP>:3000`. Deja esta terminal abierta.
+
+### 6. Probar
+
+- http://localhost:3000/public/reports debe regresar una lista de reportes en JSON.
+- Swagger: http://localhost:3000/docs
+- Login de prueba: `laura.mendez@sentinel.test` / `Admin#2026` (más cuentas abajo).
+
+### Problemas comunes
+
+| Mensaje | Solución |
+| --- | --- |
+| `Falta JWT_SECRET en .env` | No existe `.env` o le falta `JWT_SECRET` (paso 4) |
+| `Access denied for user` / `ECONNREFUSED 127.0.0.1:3306` | Usuario o contraseña de `DATABASE_URL` incorrectos, o MySQL no está corriendo |
+| `Unknown database 'sentinel'` | Falta el paso 2 |
+| `EADDRINUSE :::3000` | Ya hay algo en el puerto 3000; ciérralo o cambia `PORT` en `.env` |
+| Los reportes cargan pero sin fotos | Falta el paso 3 |
+
+## Base de datos y datos de prueba
 
 `db/schema.sql` crea la base `sentinel`, las tablas y los catálogos (rol 1 = admin, rol 2 = usuario; estado 1 = pendiente, 2 = aprobado, 3 = rechazado). `db/seed.sql` agrega datos ficticios con estas cuentas:
 
